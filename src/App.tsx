@@ -1,12 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import axios from "axios";
+import { ReactElement } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
-import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/LoginPage";
-import { ReactElement } from "react";
-import axios from "axios";
+import HomePage from "./pages/Home/HomePage";
+import LoginPage from "./pages/Login/LoginPage";
+import HomePage2 from "./pages/Home/HomePage-copy";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ function App() {
               path="/"
               element={<ProtectedRouter component={<HomePage />} />}
             />
+            <Route path="/z" element={<HomePage2 />} />
             <Route path="/login" element={<LoginPage />} />
           </Routes>
         </BrowserRouter>

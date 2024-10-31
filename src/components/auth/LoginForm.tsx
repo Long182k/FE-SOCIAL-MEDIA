@@ -59,9 +59,7 @@ const LoginForm = ({ onSwitchMode }: LoginFormProp) => {
             <Title level={3} style={{ marginBottom: 0, color: "#424242" }}>
               Welcome back
             </Title>
-            <Text type="secondary">
-              Welcome back! Log in to stay connected.
-            </Text>
+            <Text type="secondary">Log in to stay connected !!!</Text>
           </Space>
 
           <Form layout="vertical" onFinish={LoginFinish} requiredMark={false}>

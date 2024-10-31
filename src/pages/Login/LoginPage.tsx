@@ -1,9 +1,9 @@
 import { Col, Row } from "antd";
 import { useState } from "react";
-import LoginForm from "../components/auth/LoginForm";
-import SignUpForm from "../components/auth/SignUpForm";
-import assets from "../assets";
-import { SCREEN_MODE } from "../@util/constant/constant";
+import LoginForm from "../../components/auth/LoginForm";
+import SignUpForm from "../../components/auth/SignUpForm";
+import assets from "../../assets";
+import { SCREEN_MODE } from "../../@util/constant/constant";
 
 const LoginPage = () => {
   const [left, setLeft] = useState<number | string>(0);
