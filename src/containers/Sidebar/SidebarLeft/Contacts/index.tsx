@@ -2,6 +2,8 @@ import { Avatar, List, Typography } from "antd";
 import { ContactsProps } from "./contact.interface";
 const { Title, Text } = Typography;
 import "./contact.css";
+import { getTextColor } from "../../../../@util/helpers";
+
 const contacts = [
   { name: "Julia Clarke", location: "New York, USA" },
   { name: "Mark Stefine", location: "Sydney, Australia" },
@@ -11,7 +13,7 @@ const contacts = [
 function Contacts({ isDarkMode }: ContactsProps): JSX.Element {
   return (
     <div className="contacts">
-      <Title level={5} className={isDarkMode ? "text-dark" : "text-light"}>
+      <Title level={5} style={{ ...getTextColor(isDarkMode) }}>
         My Contacts
       </Title>
       <List
