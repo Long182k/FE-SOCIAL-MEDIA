@@ -10,6 +10,7 @@ import {
   UserOutlined,
   VideoCameraOutlined,
 } from "@ant-design/icons";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
@@ -21,7 +22,12 @@ import {
   Tooltip,
   Typography,
 } from "antd";
+import { AxiosError } from "axios";
+import { useState } from "react";
+import { toast } from "react-toastify";
 import { getBackgroundColor, getTextColor } from "../../@util/helpers";
+import { ErrorResponseData } from "../../@util/interface/auth.interface";
+import { createNewPost, getAllPosts } from "../../api/post";
 import IconText from "../../components/IconText";
 
 const { Header, Content } = Layout;
@@ -29,7 +35,6 @@ const { TextArea } = Input;
 const { Text } = Typography;
 
 const data = Array.from({ length: 5 }).map((_, i) => ({
-  href: "https://ant.design",
   title: `User ${i}`,
   avatar: `https://api.dicebear.com/7.x/miniavs/svg?seed=${i}`,
   postedTime: "1h",
@@ -52,11 +57,44 @@ interface CenterContentProps {
     checked: boolean | ((prevState: boolean) => boolean)
   ) => void;
 }
-
-function CenterContent({
+const CenterContent = ({
   isDarkMode,
   handleThemeChange,
-}: CenterContentProps): JSX.Element {
+}: CenterContentProps) => {
+  const [postContent, setPostContent] = useState("");
+
+  const postsQuery = useQuery({
+    queryKey: ["posts"],
+    queryFn: getAllPosts,
+  });
+
+  const createNewPostMutation = useMutation({
+    mutationFn: createNewPost,
+    onSuccess: (res) => {
+      toast.success("Post created successfully!");
+      setPostContent("");
+      postsQuery.refetch();
+    },
+    onError: (error: AxiosError<ErrorResponseData>) => {
+      const message =
+        error.response?.status === 401
+          ? error.response?.data?.message
+          : "Try Again";
+      toast.error(message);
+    },
+  });
+
+  const handleCreatePost = () => {
+    if (postContent.trim()) {
+      createNewPostMutation.mutateAsync({
+        content: postContent,
+        userId: "10432170-eaa6-4f03-bc53-3517679b332f",
+      });
+    } else {
+      toast.warning("Please enter some content before posting!");
+    }
+  };
+
   return (
     <Layout
       className="main-content-layout"
@@ -156,6 +194,8 @@ function CenterContent({
             <Avatar icon={<UserOutlined />} />
 
             <TextArea
+              value={postContent}
+              onChange={(e) => setPostContent(e.target.value)} // Update state on input change
               style={{
                 marginLeft: "20px",
                 borderRadius: "10px",
@@ -204,7 +244,11 @@ function CenterContent({
             >
               Feeling
             </Button>
-            <Button icon={<FormOutlined />} type="primary">
+            <Button
+              icon={<FormOutlined />}
+              type="primary"
+              onClick={handleCreatePost} // Trigger post creation
+            >
               Create a post
             </Button>
           </div>
@@ -222,10 +266,10 @@ function CenterContent({
             style={{ ...getTextColor(isDarkMode) }}
             itemLayout="vertical"
             size="large"
-            dataSource={data}
+            dataSource={postsQuery.data?.data || []} // Ensure posts data is defined before mapping
             renderItem={(item) => (
               <List.Item
-                key={item.title}
+                key={item.id}
                 style={{
                   padding: "16px",
                   marginBottom: "16px",
@@ -253,7 +297,6 @@ function CenterContent({
                   />,
                 ]}
               >
-                {/* Header Section with Avatar, Title, and Posted Time */}
                 <div
                   style={{
                     display: "flex",
@@ -263,35 +306,35 @@ function CenterContent({
                   }}
                 >
                   <Avatar
-                    src={item.avatar}
+                    src={`https://api.dicebear.com/7.x/miniavs/svg?seed=1`}
                     size={48}
                     style={{ marginRight: "12px" }}
                   />
                   <div>
                     <Typography.Text strong style={getTextColor(isDarkMode)}>
-                      {item.title}
+                      {item.user.userName}
                     </Typography.Text>
                     <div
                       style={{
                         color: isDarkMode ? "#ffffff99" : "#00000073",
                       }}
                     >
-                      {item.postedTime}
+                      {item.user.createdAt}
                     </div>
                   </div>
                 </div>
 
-                {/* Content Section */}
                 <Typography.Paragraph
                   style={{ margin: "8px 0", ...getTextColor(isDarkMode) }}
                 >
                   {item.content}
                 </Typography.Paragraph>
 
-                {/* Image Section */}
                 <div style={{ margin: "8px 0" }}>
                   <img
-                    src={item.image}
+                    src={
+                      "https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+                    }
                     alt="content"
                     width="100%"
                     style={{ borderRadius: "8px" }}
@@ -304,6 +347,6 @@ function CenterContent({
       </Content>
     </Layout>
   );
-}
+};
 
 export default CenterContent;

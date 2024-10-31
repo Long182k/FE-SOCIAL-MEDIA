@@ -11,6 +11,5 @@ const axiosClient = axios.create({ baseURL: API_URL });
 export const registerNewUser = (data: RegisterNewUserParams) =>
   axiosClient.post(`/auth/register`, data);
 
-export const loginUser = (data: LoginParams) => {
-  return axiosClient.post(`/auth/login`, data);
-};
+export const loginUser = (data: LoginParams) =>
+  axiosClient.post(`/auth/login`, data);

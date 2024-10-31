@@ -48,7 +48,7 @@ function SiderRight({ isDarkMode }: SiderRightProps): JSX.Element {
                 Mohammad Rafli
               </Text>
               <div style={{ marginTop: 4 }}>
-                <Avatar.Group maxCount={2}>
+                <Avatar.Group max={{ count: 2 }}>
                   <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
                   <Avatar style={{ backgroundColor: "#f56a00" }}>K</Avatar>
                   <Avatar

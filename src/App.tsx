@@ -3,8 +3,6 @@ import axios from "axios";
 import { useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "./App.css";
 import CenterContent from "./containers/CenterLayout/CenterContent";
 import HomePage from "./routes/Home";
 import LoginPage from "./routes/Login";
@@ -15,6 +13,9 @@ import Bookmarks from "./routes/Bookmarks";
 import Messages from "./routes/Messages";
 import Notifications from "./routes/Notifications";
 import Settings from "./routes/Settings";
+
+import "react-toastify/dist/ReactToastify.css";
+import "./App.css";
 
 const queryClient = new QueryClient();
 
