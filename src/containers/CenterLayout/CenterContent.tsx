@@ -78,7 +78,7 @@ const CenterContent = ({ isDarkMode }: CenterContentProps) => {
 
   return (
     <Layout>
-      <Content>
+      <Content style={{ background: isDarkMode ? "black" : "" }}>
         {/* Stories Component */}
         <div className={`stories-container ${isDarkMode ? "dark-mode" : ""}`}>
           <List

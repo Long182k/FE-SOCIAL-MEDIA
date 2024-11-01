@@ -7,7 +7,7 @@ import SidebarLeft from "../../containers/Sidebar/SidebarLeft";
 import SiderRight from "../../containers/Sidebar/SidebarRight";
 import "./index.css";
 
-const { Header, Content } = Layout;
+const { Header } = Layout;
 const { Text } = Typography;
 
 interface HomePageProps {
@@ -22,10 +22,7 @@ const HomePage = ({ isDarkMode, handleThemeChange }: HomePageProps) => {
     <Layout className="homepage-layout">
       <SidebarLeft isDarkMode={isDarkMode} />
 
-      <Layout
-        className="main-content-layout"
-        style={{ background: isDarkMode ? "black" : "" }}
-      >
+      <Layout className="main-content-layout">
         <Header
           className="responsive-header"
           style={{
@@ -69,9 +66,7 @@ const HomePage = ({ isDarkMode, handleThemeChange }: HomePageProps) => {
           </div>
         </Header>
 
-        <Content>
-          <Outlet />
-        </Content>
+        <Outlet />
       </Layout>
 
       <SiderRight isDarkMode={isDarkMode} />

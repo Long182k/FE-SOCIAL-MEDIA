@@ -9,10 +9,13 @@ export const getBackgroundColor = (isDark: boolean) => ({
 export const convertToHumanTime = (isoDate: string) => {
   const date = new Date(isoDate);
 
-  const day = date.getDate();
-  const month = date.toLocaleString("en-US", { month: "short" });
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const formattedDate = new Intl.DateTimeFormat("en-US", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
 
-  return `${day} ${month} ${hours}:${minutes}`;
+  return formattedDate;
 };
