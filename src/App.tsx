@@ -55,7 +55,7 @@ function App() {
               path="/"
               element={
                 <ProtectedRouter
-                  component={<HomePage isDarkMode={isDarkMode} />}
+                  component={<HomePage isDarkMode={isDarkMode} handleThemeChange={handleThemeChange} />}
                 />
               }
             >
