@@ -1,46 +1,30 @@
 import {
   AppstoreOutlined,
-  BulbOutlined,
   FormOutlined,
   HeartOutlined,
   MessageOutlined,
   PlusOutlined,
-  SearchOutlined,
   StarOutlined,
   UserOutlined,
   VideoCameraOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  Avatar,
-  Button,
-  Card,
-  Input,
-  Layout,
-  List,
-  Switch,
-  Tooltip,
-  Typography,
-} from "antd";
+import { Avatar, Button, Card, Input, Layout, List, Typography } from "antd";
 import { AxiosError } from "axios";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { getBackgroundColor, getTextColor } from "../../@util/helpers";
+import {
+  convertToHumanTime,
+  getBackgroundColor,
+  getTextColor,
+} from "../../@util/helpers";
 import { ErrorResponseData } from "../../@util/interface/auth.interface";
 import { createNewPost, getAllPosts } from "../../api/post";
 import IconText from "../../components/IconText";
 
-const { Header, Content } = Layout;
-const { TextArea } = Input;
+const { Content } = Layout;
 const { Text } = Typography;
-
-const data = Array.from({ length: 5 }).map((_, i) => ({
-  title: `User ${i}`,
-  avatar: `https://api.dicebear.com/7.x/miniavs/svg?seed=${i}`,
-  postedTime: "1h",
-  content: "We supply a series of design principles",
-  image: "https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png",
-}));
+const { TextArea } = Input;
 
 const storiesData = [
   { name: "Add Story", icon: <PlusOutlined />, isAddStory: true },
@@ -57,10 +41,7 @@ interface CenterContentProps {
     checked: boolean | ((prevState: boolean) => boolean)
   ) => void;
 }
-const CenterContent = ({
-  isDarkMode,
-  handleThemeChange,
-}: CenterContentProps) => {
+const CenterContent = ({ isDarkMode }: CenterContentProps) => {
   const [postContent, setPostContent] = useState("");
 
   const postsQuery = useQuery({
@@ -96,51 +77,7 @@ const CenterContent = ({
   };
 
   return (
-    <Layout
-      className="main-content-layout"
-      style={{ background: isDarkMode ? "black" : "" }}
-    >
-      <Header
-        className="responsive-header"
-        style={{
-          background: isDarkMode ? "#141414" : "#fff",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <Input
-          placeholder="Search something here..."
-          prefix={<SearchOutlined style={getTextColor(isDarkMode)} />}
-          style={{
-            width: 300,
-            marginLeft: "8px",
-            color: isDarkMode ? "#fff" : "#000",
-            borderRadius: "10px",
-            background: isDarkMode ? "rgb(100 100 100)" : "#ffffff",
-            borderColor: isDarkMode ? "#333" : "#ddd",
-            alignSelf: "center",
-            marginTop: "8px",
-          }}
-        />
-        <div
-          className="header-right"
-          style={{ display: "flex", alignItems: "center" }}
-        >
-          <Text style={getTextColor(isDarkMode)}>Lillibridge</Text>
-          <Avatar icon={<UserOutlined />} />
-          <Tooltip
-            title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          >
-            <Switch
-              checkedChildren={<BulbOutlined />}
-              unCheckedChildren={<BulbOutlined />}
-              checked={isDarkMode}
-              onChange={handleThemeChange}
-            />
-          </Tooltip>
-        </div>
-      </Header>
-
+    <Layout>
       <Content>
         {/* Stories Component */}
         <div className={`stories-container ${isDarkMode ? "dark-mode" : ""}`}>
@@ -195,7 +132,7 @@ const CenterContent = ({
 
             <TextArea
               value={postContent}
-              onChange={(e) => setPostContent(e.target.value)} // Update state on input change
+              onChange={(e) => setPostContent(e.target.value)}
               style={{
                 marginLeft: "20px",
                 borderRadius: "10px",
@@ -247,7 +184,7 @@ const CenterContent = ({
             <Button
               icon={<FormOutlined />}
               type="primary"
-              onClick={handleCreatePost} // Trigger post creation
+              onClick={handleCreatePost}
             >
               Create a post
             </Button>
@@ -266,7 +203,7 @@ const CenterContent = ({
             style={{ ...getTextColor(isDarkMode) }}
             itemLayout="vertical"
             size="large"
-            dataSource={postsQuery.data?.data || []} // Ensure posts data is defined before mapping
+            dataSource={postsQuery.data?.data || []}
             renderItem={(item) => (
               <List.Item
                 key={item.id}
@@ -319,7 +256,7 @@ const CenterContent = ({
                         color: isDarkMode ? "#ffffff99" : "#00000073",
                       }}
                     >
-                      {item.user.createdAt}
+                      {convertToHumanTime(item.user.createdAt)}
                     </div>
                   </div>
                 </div>
