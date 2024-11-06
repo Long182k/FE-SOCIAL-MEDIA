@@ -1,9 +1,10 @@
-import { Col, Row } from "antd";
+import { Col, Row, message } from "antd";
 import { useState } from "react";
 import LoginForm from "../../components/auth/LoginForm";
 import SignUpForm from "../../components/auth/SignUpForm";
 import assets from "../../assets";
 import { SCREEN_MODE } from "../../@util/constant/constant";
+import { useUser } from "../../contexts/UserContext"; // Import User Context
 
 const LoginPage = () => {
   const [left, setLeft] = useState<number | string>(0);
@@ -13,6 +14,7 @@ const LoginPage = () => {
     assets.images.loginBackground
   );
   const [currMode, setCurrMode] = useState(SCREEN_MODE.SIGN_IN);
+  const { setUserId } = useUser(); // Use user context to set the user ID after login
 
   const onSwitchMode = (mode: SCREEN_MODE) => {
     setWidth(100);
@@ -44,6 +46,14 @@ const LoginPage = () => {
     };
   };
 
+  // Function to handle successful login
+  const handleLoginSuccess = (userId: string, accessToken: string) => {
+    setUserId(userId); // Set the user ID in the context
+    localStorage.setItem("access_token", accessToken);
+    localStorage.setItem("user_id", userId); // Store userId in localStorage
+    // message.success("Login successful!");
+  };
+
   return (
     <Row
       style={{
@@ -66,7 +76,7 @@ const LoginPage = () => {
         }}
       >
         {currMode === SCREEN_MODE.SIGN_IN ? (
-          <LoginForm onSwitchMode={onSwitchMode} />
+          <LoginForm onSwitchMode={onSwitchMode} onLoginSuccess={handleLoginSuccess} />
         ) : (
           <SignUpForm onSwitchMode={onSwitchMode} />
         )}

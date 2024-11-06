@@ -1,6 +1,6 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"; 
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import CenterContent from "./containers/CenterLayout/CenterContent";
@@ -9,10 +9,12 @@ import LoginPage from "./routes/Login";
 import Marketplace from "./routes/Marketplace";
 import Explore from "./routes/Explore";
 import Groups from "./routes/Groups";
+// import GroupOverview from "./routes/Groups/GroupOverview";
 import Bookmarks from "./routes/Bookmarks";
 import Messages from "./routes/Messages";
 import Notifications from "./routes/Notifications";
 import Settings from "./routes/Settings";
+import { UserProvider, useUser } from "./contexts/UserContext"; // Import User Context
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -25,6 +27,16 @@ interface ProtectedRouterProps {
 
 const ProtectedRouter = ({ component }: ProtectedRouterProps) => {
   const auth = localStorage.getItem("access_token");
+  const { setUserId } = useUser(); // Access user context to set userId
+
+  useEffect(() => {
+    if (auth) {
+      const userId = localStorage.getItem("user_id");
+      if (userId) {
+        setUserId(userId); // Set userId in UserContext
+      }
+    }
+  }, [auth, setUserId]);
 
   if (auth) {
     return component;
@@ -43,65 +55,70 @@ function App() {
     document.body.style.backgroundColor = checked ? "#141414" : "#ffffff";
     document.body.style.color = checked ? "#ffffff" : "#000000";
   };
+
   axios.defaults.withCredentials = true;
 
   return (
     <div>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <Routes>
-            {/* Wrap protected routes inside Layout */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRouter
-                  component={<HomePage isDarkMode={isDarkMode} handleThemeChange={handleThemeChange} />}
-                />
-              }
-            >
+        <UserProvider> 
+          <BrowserRouter>
+            <Routes>
               <Route
-                index
+                path="/"
                 element={
-                  <CenterContent
-                    isDarkMode={isDarkMode}
-                    handleThemeChange={handleThemeChange}
+                  <ProtectedRouter
+                    component={<HomePage isDarkMode={isDarkMode} handleThemeChange={handleThemeChange} />}
                   />
                 }
-              />
-              <Route
-                path="explore"
-                element={<Explore isDarkMode={isDarkMode} />}
-              />
-              <Route
-                path="marketplace"
-                element={<Marketplace isDarkMode={isDarkMode} />}
-              />
-              <Route
-                path="groups"
-                element={<Groups isDarkMode={isDarkMode} />}
-              />
-              <Route
-                path="bookmarks"
-                element={<Bookmarks isDarkMode={isDarkMode} />}
-              />
-              <Route
-                path="messages"
-                element={<Messages isDarkMode={isDarkMode} />}
-              />
-              <Route
-                path="notifications"
-                element={<Notifications isDarkMode={isDarkMode} />}
-              />
-              <Route
-                path="settings"
-                element={<Settings isDarkMode={isDarkMode} />}
-              />
-            </Route>
+              >
+                <Route
+                  index
+                  element={
+                    <CenterContent
+                      isDarkMode={isDarkMode}
+                      handleThemeChange={handleThemeChange}
+                    />
+                  }
+                />
+                <Route
+                  path="explore"
+                  element={<Explore isDarkMode={isDarkMode} />}
+                />
+                <Route
+                  path="marketplace"
+                  element={<Marketplace isDarkMode={isDarkMode} />}
+                />
+                <Route
+                  path="groups"
+                  element={<Groups isDarkMode={isDarkMode} />}
+                />
+                {/* <Route
+                  path="group-overview" // New route for GroupOverview
+                  element={<GroupOverview isDarkMode={isDarkMode} />}
+                /> */}
+                <Route
+                  path="bookmarks"
+                  element={<Bookmarks isDarkMode={isDarkMode} />}
+                />
+                <Route
+                  path="messages"
+                  element={<Messages isDarkMode={isDarkMode} />}
+                />
+                <Route
+                  path="notifications"
+                  element={<Notifications isDarkMode={isDarkMode} />}
+                />
+                <Route
+                  path="settings"
+                  element={<Settings isDarkMode={isDarkMode} />}
+                />
+              </Route>
 
-            {/* Other routes outside layout */}
-            <Route path="/login" element={<LoginPage />} />
-          </Routes>
-        </BrowserRouter>
+              <Route path="/login" element={<LoginPage />} />
+            </Routes>
+          </BrowserRouter>
+        </UserProvider>
       </QueryClientProvider>
       <ToastContainer position="top-right" theme="dark" />
     </div>

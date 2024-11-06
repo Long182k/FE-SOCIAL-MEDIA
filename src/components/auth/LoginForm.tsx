@@ -13,7 +13,11 @@ import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
-const LoginForm = ({ onSwitchMode }: LoginFormProp) => {
+interface LoginFormProps extends LoginFormProp {
+  onLoginSuccess: (userId: string, accessToken: string) => void;
+}
+
+const LoginForm = ({ onSwitchMode, onLoginSuccess }: LoginFormProps) => {
   const navigate = useNavigate();
 
   const LoginFinish = async (values: LoginParams) => {
@@ -28,13 +32,17 @@ const LoginForm = ({ onSwitchMode }: LoginFormProp) => {
   const loginMutation = useMutation({
     mutationFn: loginUser,
     onSuccess: (res) => {
-      localStorage.setItem("access_token", res.data.accessToken);
-      toast.success(
-        "Login successfully"
-        // intl.formatMessage({
-        //   id: res?.data?.message,
-        // })
-      );
+      const { userId, accessToken } = res.data;
+
+      // Store access token and userId in localStorage
+      localStorage.setItem("access_token", accessToken);
+      localStorage.setItem("user_id", userId);
+
+      // Notify the parent component of successful login
+      onLoginSuccess(userId, accessToken);
+
+      toast.success("Login successfully");
+
       navigate("/");
     },
     onError: (error: AxiosError<ErrorResponseData>) => {
