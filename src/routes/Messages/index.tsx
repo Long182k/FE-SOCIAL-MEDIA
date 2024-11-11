@@ -9,11 +9,15 @@ import {
   Space,
   Typography,
 } from "antd";
+import { useEffect, useState } from "react";
+import io from "socket.io-client";
+
+const socket = io(import.meta.env.VITE_SOCKET_URL);
 
 const { Sider, Content } = Layout;
 const { Text } = Typography;
 
-const messages = [
+const messageszz = [
   {
     id: 1,
     user: "Florian",
@@ -50,6 +54,21 @@ interface MessageAppProps {
 }
 
 function MessagesApp({ isDarkMode }: MessageAppProps): JSX.Element {
+  const [messages, setMessages] = useState([]);
+  const [newMessages, setNewMessages] = useState("");
+
+  const handleSendNewMsg = () => {
+    console.log("click");
+    socket.emit("message", newMessages);
+    setNewMessages("");
+  };
+
+  useEffect(() => {
+    socket.on("message", (message) => {
+      setMessages([...messages, message]);
+    });
+  }, [messages]);
+
   return (
     <Layout style={{ height: "100vh", background: "#181818" }}>
       {/* Sidebar */}
@@ -140,8 +159,16 @@ function MessagesApp({ isDarkMode }: MessageAppProps): JSX.Element {
           <Text type="secondary" style={{ color: "#999" }}>
             UNREAD MESSAGES
           </Text>
-          <List
-            dataSource={messages}
+
+          {messages.map((msg, id) => (
+            <Text key={id} style={{ color: "white" }}>
+              {" "}
+              {msg}
+            </Text>
+          ))}
+
+          {/* <List
+            dataSource={messageszz}
             renderItem={(item) => (
               <List.Item key={item.id} style={{ padding: "15px 0" }}>
                 <List.Item.Meta
@@ -171,19 +198,31 @@ function MessagesApp({ isDarkMode }: MessageAppProps): JSX.Element {
                 />
               </List.Item>
             )}
-          />
+          /> */}
         </div>
 
         {/* Message Input */}
         <Input
           placeholder="Type your message"
-          suffix={<SendOutlined style={{ color: "#1890ff" }} />}
+          suffix={
+            <SendOutlined
+              onClick={handleSendNewMsg}
+              style={{ color: "#1890ff" }}
+            />
+          }
           style={{
             backgroundColor: "#1f1f1f",
             borderRadius: "20px",
             marginTop: "10px",
             padding: "10px 15px",
             color: "#fff",
+          }}
+          onChange={(e) => setNewMessages(e.target.value)}
+          value={newMessages}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSendNewMsg();
+            }
           }}
         />
       </Content>
