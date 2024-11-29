@@ -51,7 +51,7 @@ const CenterContent = ({ isDarkMode }: CenterContentProps) => {
 
   const createNewPostMutation = useMutation({
     mutationFn: createNewPost,
-    onSuccess: (res) => {
+    onSuccess: () => {
       toast.success("Post created successfully!");
       setPostContent("");
       postsQuery.refetch();

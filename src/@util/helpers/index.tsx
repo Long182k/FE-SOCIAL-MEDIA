@@ -10,8 +10,8 @@ export const convertToHumanTime = (isoDate: string) => {
   const date = new Date(isoDate);
 
   const formattedDate = new Intl.DateTimeFormat("en-US", {
-    day: "numeric",
-    month: "short",
+    // day: "numeric",
+    // month: "short",
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,

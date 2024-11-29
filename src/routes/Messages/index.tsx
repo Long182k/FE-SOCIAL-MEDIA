@@ -1,233 +1,416 @@
-import { SearchOutlined, SendOutlined } from "@ant-design/icons";
+import {
+  PaperClipOutlined,
+  PlusOutlined,
+  SendOutlined,
+} from "@ant-design/icons";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Avatar,
-  Badge,
-  Divider,
+  Button,
   Input,
   Layout,
   List,
+  Modal,
+  Select,
   Space,
   Typography,
 } from "antd";
-import { useEffect, useState } from "react";
-import io from "socket.io-client";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
+import { User } from "../../@util/types/auth.type";
 
-const socket = io(import.meta.env.VITE_SOCKET_URL);
+import { convertToHumanTime } from "../../@util/helpers";
+import { ChatRoom } from "../../@util/interface/chat.interface";
+import { useAppStore } from "../../store";
+import "./Chat.css"; // Custom CSS for chat bubble styles
 
-const { Sider, Content } = Layout;
 const { Text } = Typography;
 
-const messageszz = [
-  {
-    id: 1,
-    user: "Florian",
-    message: "whats up guys?",
-    timestamp: "Today at 7:55 AM",
-  },
-  {
-    id: 2,
-    user: "Coding in Flow",
-    message: "pls respond",
-    timestamp: "Today at 7:58 AM",
-  },
-];
+type MessageProps = {
+  currentUserId: string;
+};
 
-const chatGroups = [
-  {
-    id: 1,
-    name: "Florian, Coding in Flow, Fridolin",
-    lastMessage: "whats up guys?",
-    avatar: "F",
-    unread: true,
-  },
-  {
-    id: 2,
-    name: "Coding in Flow",
-    lastMessage: "pls respond",
-    avatar: "C",
-    unread: false,
-  },
-];
-
-interface MessageAppProps {
-  isDarkMode: boolean;
-}
-
-function MessagesApp({ isDarkMode }: MessageAppProps): JSX.Element {
-  const [messages, setMessages] = useState([]);
-  const [newMessages, setNewMessages] = useState("");
-
-  const handleSendNewMsg = () => {
-    console.log("click");
-    socket.emit("message", newMessages);
-    setNewMessages("");
+const MessageApp = ({ currentUserId }: MessageProps) => {
+  const initialChatRoom: ChatRoom = {
+    id: "",
+    name: "",
+    type: "DIRECT",
+    userId: currentUserId,
+    creatorId: currentUserId,
+    createdAt: "",
+    updatedAt: "",
+    participants: [
+      {
+        id: "",
+        userId: "",
+        chatRoomId: "",
+        joinedAt: "",
+      },
+    ],
+    messages: [
+      {
+        id: "",
+        content: "",
+        type: "MESSAGE",
+        senderId: "",
+        receiverId: "",
+        chatRoomId: "",
+        createdAt: "",
+        updatedAt: "",
+      },
+    ],
+    user: null,
   };
 
+  const { Title } = Typography;
+
+  const {
+    messages,
+    isMessagesLoading,
+    selectedUser,
+    selectedChatRoom,
+    setSelectedUser,
+    setSelectedChatRoom,
+    fetchContacts,
+    getMessages,
+    getChatRoom,
+    sendMessage,
+    createDirectChat,
+    subscribeToMessages,
+    unsubscribeFromMessages,
+  } = useAppStore();
+
+  // const [selectedChatRoom, setSelectedChatRoom] =
+  //   useState<ChatRoom>(initialChatRoom);
+  const [content, setContent] = useState("");
+  const [contactsModalVisible, setContactsModalVisible] = useState(false);
+  const [modalType, setModalType] = useState<"direct" | "channel">("direct");
+
+  const messageEndRef = useRef<HTMLDivElement | null>(null);
+
+  const handleSelectChatRoom = (room: ChatRoom) => {
+    if (selectedChatRoom?.id !== room.id) {
+      setSelectedChatRoom(room); // Only update if the room is different
+    }
+  };
+
+  // useEffect(() => {
+  //   if (selectedChatRoom && selectedChatRoom.id !== "") {
+  //     getMessages(selectedChatRoom.id);
+
+  //     subscribeToMessages();
+
+  //     return () => unsubscribeFromMessages();
+  //   }
+  // }, [
+  //   selectedChatRoom?.id,
+  //   getMessages,
+  //   subscribeToMessages,
+  //   unsubscribeFromMessages,
+  // ]);
+
+
   useEffect(() => {
-    socket.on("message", (message) => {
-      setMessages([...messages, message]);
-    });
+    if (messageEndRef.current && messages) {
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
+  const {
+    data: chatRoomsQuery,
+    isLoading: isLoadingChatRooms,
+    // refetch: refetchChatRooms,
+    // isRefetching: isRefetchingChatRooms,
+  } = useQuery<ChatRoom[], Error>({
+    queryKey: ["chatRooms", currentUserId],
+    queryFn: () => getChatRoom(currentUserId),
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: contactsQuery, isLoading: isLoadingContacts } = useQuery({
+    queryKey: ["contacts"],
+    queryFn: fetchContacts,
+    select: (data) => data,
+    refetchOnWindowFocus: false,
+  });
+
+  const sendMessageMutation = useMutation({
+    mutationFn: sendMessage,
+    onSuccess: () => {
+      if (selectedChatRoom && selectedChatRoom.id) {
+        getMessages(selectedChatRoom.id);
+
+        subscribeToMessages();
+      }
+      // refetchMessages();
+
+      setContent("");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+    onSettled: () => {
+      unsubscribeFromMessages();
+    },
+  });
+
+  const createDirectChatMutation = useMutation({
+    mutationFn: createDirectChat,
+    onSuccess: (newChatRoom) => {
+      handleSelectChatRoom(newChatRoom);
+      setContactsModalVisible(false);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const handleSendMessage = () => {
+    if (!content.trim() || !selectedChatRoom) return;
+    sendMessageMutation.mutate({
+      chatRoomId: selectedChatRoom.id,
+      senderId: currentUserId,
+      receiverId: selectedUser?.id ?? "1",
+      content,
+    });
+    setContent(""); // Clear the input after sending the message
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault(); // Prevent default Enter behavior (e.g., adding a new line)
+      handleSendMessage(); // Trigger send message
+    }
+  };
+
+  const handleCreateDirectChat = () => {
+    if (!selectedUser) return;
+    createDirectChatMutation.mutate({
+      senderId: currentUserId,
+      receiverId: selectedUser.id,
+    });
+  };
+
+  const showModal = (type: "direct" | "channel") => {
+    setModalType(type);
+    setContactsModalVisible(true);
+  };
+
   return (
-    <Layout style={{ height: "100vh", background: "#181818" }}>
-      {/* Sidebar */}
-      <Sider width={300} style={{ background: "#2b2b2b", padding: "20px" }}>
-        <Typography.Title
-          level={4}
-          style={{ color: "#fff", marginBottom: "20px" }}
-        >
-          Messages
-        </Typography.Title>
-
-        {/* Search Bar */}
-        <Input
-          placeholder="Search"
-          prefix={<SearchOutlined />}
-          style={{
-            backgroundColor: "#1f1f1f",
-            border: "none",
-            color: "#fff",
-            marginBottom: "20px",
-          }}
-        />
-
-        {/* Chat Groups List */}
-        <List
-          dataSource={chatGroups}
-          renderItem={(item) => (
-            <List.Item
-              key={item.id}
+    <Layout style={{ height: "20vh", background: "#1E1F22" }}>
+      <Layout.Sider width={250} style={{ background: "#2B2D31" }}>
+        <div style={{ padding: "20px" }}>
+          <div style={{ marginBottom: "20px" }}>
+            <div
               style={{
-                backgroundColor: item.unread ? "#333" : "transparent",
-                padding: "10px",
-                borderRadius: "8px",
-                marginBottom: "10px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
               }}
             >
-              <List.Item.Meta
-                avatar={
-                  <Avatar style={{ backgroundColor: "#1890ff" }}>
-                    {item.avatar}
-                  </Avatar>
-                }
-                title={
-                  <Space>
-                    <Text style={{ color: "#fff" }}>{item.name}</Text>
-                    {item.unread && (
-                      <Badge dot style={{ backgroundColor: "#ff4d4f" }} />
-                    )}
-                  </Space>
-                }
-                description={
-                  <Text style={{ color: "#999" }}>{item.lastMessage}</Text>
-                }
+              <Title level={5} style={{ color: "#96989D", margin: 0 }}>
+                DIRECT MESSAGES
+              </Title>
+              <Button
+                type="text"
+                icon={<PlusOutlined style={{ color: "#96989D" }} />}
+                onClick={() => showModal("direct")}
               />
-            </List.Item>
-          )}
-        />
-      </Sider>
+            </div>
+            {isLoadingChatRooms ? (
+              <div style={{ color: "#fff" }}>Loading direct messages...</div>
+            ) : (
+              <List
+                dataSource={
+                  (chatRoomsQuery as ChatRoom[])?.filter(
+                    (room) => room.type === "DIRECT"
+                  ) || []
+                }
+                renderItem={(room) => (
+                  <List.Item
+                    key={room.id}
+                    onClick={() => handleSelectChatRoom(room)}
+                    style={{
+                      padding: "8px",
+                      cursor: "pointer",
+                      color: "#96989D",
+                      borderRadius: "4px",
+                      background:
+                        selectedChatRoom?.id === room.id
+                          ? "#393C43"
+                          : "transparent",
+                    }}
+                  >
+                    {room.participants?.find(
+                      (participant) => participant.userId !== currentUserId
+                    )?.user?.userName || "Unknown User"}
+                  </List.Item>
+                )}
+              />
+            )}
+          </div>
 
-      {/* Chat Content */}
-      <Content
-        style={{ padding: "20px", background: "#181818", color: "#fff" }}
-      >
-        {/* Chat Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            marginBottom: "20px",
-          }}
-        >
-          <Avatar size={48} style={{ backgroundColor: "#1890ff" }}>
-            F
-          </Avatar>
-          <div style={{ marginLeft: "15px" }}>
-            <Text style={{ fontSize: "18px", color: "#fff" }}>
-              Florian, Coding in Flow, Fridolin
-            </Text>
-            <Text style={{ color: "#999", display: "block" }}>
-              3 members, 2 online
-            </Text>
+          <div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Title level={5} style={{ color: "#96989D", margin: 0 }}>
+                CHANNELS
+              </Title>
+              <Button
+                type="text"
+                icon={<PlusOutlined style={{ color: "#96989D" }} />}
+                onClick={() => showModal("channel")}
+              />
+            </div>
+            {isLoadingChatRooms ? (
+              <div style={{ color: "#fff" }}>Loading channels...</div>
+            ) : (
+              <List
+                dataSource={
+                  (chatRoomsQuery as ChatRoom[])?.filter(
+                    (room) => room.type === "GROUP"
+                  ) || []
+                }
+                renderItem={(room) => (
+                  <List.Item
+                    key={room.id}
+                    onClick={() => handleSelectChatRoom(room)}
+                    style={{
+                      padding: "8px",
+                      cursor: "pointer",
+                      color: "#96989D",
+                      borderRadius: "4px",
+                      background:
+                        selectedChatRoom?.id === room.id
+                          ? "#393C43"
+                          : "transparent",
+                    }}
+                  >
+                    # {room.name}
+                  </List.Item>
+                )}
+              />
+            )}
           </div>
         </div>
-        <Divider style={{ backgroundColor: "#333" }} />
+      </Layout.Sider>
 
-        {/* Messages */}
-        <div style={{ height: "calc(100vh - 200px)", overflowY: "auto" }}>
-          <Text type="secondary" style={{ color: "#999" }}>
-            UNREAD MESSAGES
-          </Text>
+      <Layout.Content style={{ background: "#313338" }}>
+        {selectedChatRoom && (
+          <div
+            style={{ height: "100%", display: "flex", flexDirection: "column" }}
+          >
+            <div style={{ flex: 1, padding: "20px", overflowY: "auto" }}>
+              {isMessagesLoading ? (
+                <div style={{ color: "#fff" }}>Loading messages...</div>
+              ) : (
+                <div className="chat-container">
+                  {messages?.map((message) => (
+                    <div
+                      key={message.id}
+                      ref={messageEndRef}
+                      className={`message ${
+                        message.senderId === currentUserId ? "right" : "left"
+                      }`}
+                    >
+                      {message.senderId !== currentUserId && (
+                        <Avatar
+                          src={message.user.avatarUrl}
+                          className="avatar"
+                        />
+                      )}
+                      <div className="bubble">
+                        <Text className="author">{message.user.userName}</Text>
+                        <p className="content">{message.content}</p>
+                        <Text className="timestamp">
+                          {convertToHumanTime(message.createdAt)}
+                        </Text>
+                      </div>
+                      {message.senderId === currentUserId && (
+                        <Avatar
+                          src={message.user.avatarUrl}
+                          className="avatar"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          {messages.map((msg, id) => (
-            <Text key={id} style={{ color: "white" }}>
-              {" "}
-              {msg}
-            </Text>
-          ))}
-
-          {/* <List
-            dataSource={messageszz}
-            renderItem={(item) => (
-              <List.Item key={item.id} style={{ padding: "15px 0" }}>
-                <List.Item.Meta
-                  avatar={
-                    <Avatar style={{ backgroundColor: "#1890ff" }}>
-                      {item.user.charAt(0)}
-                    </Avatar>
-                  }
-                  title={<Text style={{ color: "#fff" }}>{item.user}</Text>}
-                  description={
-                    <Space direction="vertical">
-                      <Text
-                        style={{
-                          color: "#fff",
-                          backgroundColor: "#333",
-                          padding: "10px 15px",
-                          borderRadius: "10px",
-                        }}
-                      >
-                        {item.message}
-                      </Text>
-                      <Text style={{ color: "#999", fontSize: "12px" }}>
-                        {item.timestamp}
-                      </Text>
-                    </Space>
-                  }
+            <div style={{ padding: "20px", borderTop: "1px solid #3F4147" }}>
+              <Space.Compact style={{ display: "flex", alignItems: "center" }}>
+                {/* Attachment Button */}
+                <Button
+                  type="text"
+                  icon={<PaperClipOutlined style={{ color: "#B5BAC1" }} />}
+                  style={{ marginRight: "8px" }}
                 />
-              </List.Item>
-            )}
-          /> */}
-        </div>
 
-        {/* Message Input */}
-        <Input
-          placeholder="Type your message"
-          suffix={
-            <SendOutlined
-              onClick={handleSendNewMsg}
-              style={{ color: "#1890ff" }}
-            />
-          }
-          style={{
-            backgroundColor: "#1f1f1f",
-            borderRadius: "20px",
-            marginTop: "10px",
-            padding: "10px 15px",
-            color: "#fff",
-          }}
-          onChange={(e) => setNewMessages(e.target.value)}
-          value={newMessages}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSendNewMsg();
-            }
-          }}
-        />
-      </Content>
+                {/* Input Field */}
+                <Input
+                  placeholder="Enter message"
+                  style={{
+                    flex: 1,
+                    background: "#383A40",
+                    border: "none",
+                    color: "#fff",
+                  }}
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  onKeyDown={handleKeyDown} // Detect Enter key press
+                />
+
+                {/* Send Button */}
+                <Button
+                  type="primary"
+                  icon={<SendOutlined />}
+                  onClick={handleSendMessage} // Trigger send on button click
+                  loading={sendMessageMutation.isPending} // Show loading state
+                  style={{ marginLeft: "8px" }}
+                />
+              </Space.Compact>
+            </div>
+          </div>
+        )}
+      </Layout.Content>
+
+      <Modal
+        title={modalType === "direct" ? "Select Contact" : "Create Channel"}
+        open={contactsModalVisible}
+        onCancel={() => setContactsModalVisible(false)}
+        footer={[
+          <Button key="back" onClick={() => setContactsModalVisible(false)}>
+            Cancel
+          </Button>,
+          <Button key="submit" type="primary" onClick={handleCreateDirectChat}>
+            {modalType === "direct" ? "Start Conversation" : "Create Channel"}
+          </Button>,
+        ]}
+      >
+        {isLoadingContacts ? (
+          <div>Loading contacts...</div>
+        ) : (
+          <Select
+            value={selectedUser}
+            onChange={setSelectedUser}
+            style={{ width: "100%" }}
+          >
+            {contactsQuery?.map((contact: User) => (
+              <Select.Option key={contact.id} value={contact.userName}>
+                {contact.userName}
+              </Select.Option>
+            ))}
+          </Select>
+        )}
+      </Modal>
     </Layout>
   );
-}
+};
 
-export default MessagesApp;
+export default MessageApp;

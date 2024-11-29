@@ -1,20 +1,21 @@
+import { useMutation } from "@tanstack/react-query";
 import { Button, Col, Form, Input, Row, Space, Typography } from "antd";
+import { AxiosError } from "axios";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { SCREEN_MODE } from "../../@util/constant/constant";
 import {
   ErrorResponseData,
   LoginFormProp,
 } from "../../@util/interface/auth.interface";
 import { LoginParams } from "../../@util/types/auth.type";
-import { useMutation } from "@tanstack/react-query";
-import { loginUser } from "../../api/auth";
-import { toast } from "react-toastify";
-import { AxiosError } from "axios";
-import { useNavigate } from "react-router-dom";
+import { useAppStore } from "../../store";
 
 const { Title, Text } = Typography;
 
 const LoginForm = ({ onSwitchMode }: LoginFormProp) => {
   const navigate = useNavigate();
+  const { login } = useAppStore();
 
   const LoginFinish = async (values: LoginParams) => {
     const userData = {
@@ -26,15 +27,17 @@ const LoginForm = ({ onSwitchMode }: LoginFormProp) => {
   };
 
   const loginMutation = useMutation({
-    mutationFn: loginUser,
+    mutationFn: login,
     onSuccess: (res) => {
-      localStorage.setItem("access_token", res.data.accessToken);
+      localStorage.setItem("access_token", res.accessToken);
+
       toast.success(
         "Login successfully"
         // intl.formatMessage({
         //   id: res?.data?.message,
         // })
       );
+
       navigate("/");
     },
     onError: (error: AxiosError<ErrorResponseData>) => {
