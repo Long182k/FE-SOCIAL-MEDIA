@@ -25,12 +25,10 @@ interface HomePageProps {
 
 const HomePage = ({ isDarkMode, handleThemeChange }: HomePageProps) => {
   const navigate = useNavigate();
-  const { userInfo, removeUserInfo } = useAppStore();
+  const { userInfo, logout } = useAppStore();
 
   const handleLogout = () => {
-    localStorage.removeItem("access_token");
-
-    removeUserInfo();
+    logout();
     navigate("/login");
   };
   return (

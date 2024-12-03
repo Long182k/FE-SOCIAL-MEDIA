@@ -95,8 +95,6 @@ export interface GetMessageResponse {
 
 export interface ChatStore {
   messages: GetMessageResponse[]; // Array of messages
-  users: User[]; // Array of users
-  selectedUser: null | User; // Currently selected user
   selectedChatRoom: null | ChatRoom; // Currently selected user
   isUsersLoading: boolean; // Loading state for fetching users
   isMessagesLoading: boolean; // Loading state for fetching messages
@@ -115,11 +113,12 @@ export interface ChatStore {
   createDirectChat: (directChatData: {
     senderId: string;
     receiverId: string;
+    type: "DIRECT" | "GROUP";
+    name: string;
   }) => Promise<CreateDirectChatResponse>;
 
   subscribeToMessages: () => void;
   unsubscribeFromMessages: () => void;
-  setSelectedUser: (selectedUser: User | null) => void;
   setSelectedChatRoom: (selectedChatRoom: ChatRoom | null) => void;
 }
 

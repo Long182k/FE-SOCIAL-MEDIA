@@ -22,6 +22,7 @@ export interface AuthStore {
   userInfo: User;
   socket: SocketInstance | null;
   onlineUsers: User[];
+  isSocketConnected: boolean;
   addAccessToken: (accessToken: string) => void;
   getAccessToken: () => string | undefined;
   removeAccessToken: () => void;

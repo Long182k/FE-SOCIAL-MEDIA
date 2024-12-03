@@ -15,11 +15,12 @@ const SOCKET_URL = import.meta.env.VITE_SERVER_URL;
 // Configure persist options for AuthStore
 const authPersistOptions: PersistOptions<
   AuthStore,
-  Pick<AuthStore, "userInfo">
+  Pick<AuthStore, "userInfo" | "isSocketConnected" | "onlineUsers">
 > = {
   name: "auth_storage",
   partialize: (state) => ({
     userInfo: state.userInfo,
+    isSocketConnected: state.isSocketConnected,
     onlineUsers: state.onlineUsers,
   }),
 };
@@ -30,6 +31,7 @@ const createAuthState: StateCreator<AuthStore> = (set, get) => ({
   userInfo: {} as User,
   socket: null,
   onlineUsers: [],
+  isSocketConnected: false,
   addAccessToken: (accessToken: string) => set({ accessToken }),
   getAccessToken: () => get().accessToken,
   removeAccessToken: () => set({ accessToken: undefined }),
@@ -59,9 +61,10 @@ const createAuthState: StateCreator<AuthStore> = (set, get) => ({
       localStorage.setItem("access_token", dataResponse.accessToken);
 
       set({ userInfo: dataResponse });
-      console.log("dataResponse.accessToken", dataResponse);
+
       get().connectSocket();
-      return dataResponse; // Ensures a valid LoginResponse is returned
+
+      return dataResponse;
     } catch (error) {
       console.error("Login error", error);
       throw error; // Rejects the Promise with the error
@@ -69,19 +72,29 @@ const createAuthState: StateCreator<AuthStore> = (set, get) => ({
   },
 
   logout: async () => {
+    const { userInfo } = get();
+
     try {
-      await axiosInitialClient.post("/auth/logout");
-      set({ userInfo: undefined });
+      await axiosInitialClient.post(`/auth/logout/${userInfo.userId}`);
+
+      set({
+        userInfo: undefined,
+        isSocketConnected: false,
+      });
+
+      localStorage.removeItem("access_token");
+
       toast.success("Logged out successfully");
       get().disconnectSocket();
+      get().removeUserInfo();
     } catch (error) {
       console.log("error", error);
-      // toast.error(error.response.data.message);
     }
   },
   connectSocket: () => {
-    const { userInfo } = get();
-    if (!userInfo || get().socket?.connected) {
+    const { userInfo, isSocketConnected } = get();
+
+    if (!userInfo || isSocketConnected) {
       console.log("Socket already connected or no user info available.");
       return;
     }
@@ -97,19 +110,31 @@ const createAuthState: StateCreator<AuthStore> = (set, get) => ({
 
     socket.on("connect", () => {
       console.log("Socket connected successfully:", socket.id);
+      set({ isSocketConnected: true });
     });
 
     socket.on("connect_error", (error) => {
       console.error("Socket connection error:", error);
+      set({ isSocketConnected: false });
     });
 
-    set({ socket });
+    socket.on("disconnect", () => {
+      console.log("Socket disconnected");
+      set({ isSocketConnected: false });
+    });
+
+    // localStorage.setItem('socket',socket)
+
+    set({ socket: socket });
   },
 
   disconnectSocket: () => {
-    if (get().socket?.connected) get()?.socket?.disconnect();
+    const socket = get().socket;
+    if (socket?.connected) {
+      socket.disconnect();
+      set({ socket: null, isSocketConnected: false });
+    }
   },
 });
 
-// Export AuthStore with persistence
 export const createAuthStore = persist(createAuthState, authPersistOptions);

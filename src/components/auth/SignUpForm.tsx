@@ -10,13 +10,11 @@ import {
 } from "../../@util/interface/auth.interface";
 import { RegisterNewUserParams } from "../../@util/types/auth.type";
 import { registerNewUser } from "../../api/auth";
-import { useAppStore } from "../../store";
 
 const { Title, Text } = Typography;
 
 const SignUpForm = ({ onSwitchMode }: LoginFormProp) => {
   const navigate = useNavigate();
-  const { connectSocket } = useAppStore();
 
   const SignUpFinish = async (values: RegisterNewUserParams) => {
     const userData = {
@@ -31,7 +29,6 @@ const SignUpForm = ({ onSwitchMode }: LoginFormProp) => {
   const createUserMutation = useMutation({
     mutationFn: registerNewUser,
     onSuccess: (res) => {
-      // connectSocket();
       localStorage.setItem("access_token", res.data.accessToken);
       toast.success(
         "Login successfully"

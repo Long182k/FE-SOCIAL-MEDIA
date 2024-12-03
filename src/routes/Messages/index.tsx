@@ -31,45 +31,12 @@ type MessageProps = {
 };
 
 const MessageApp = ({ currentUserId }: MessageProps) => {
-  const initialChatRoom: ChatRoom = {
-    id: "",
-    name: "",
-    type: "DIRECT",
-    userId: currentUserId,
-    creatorId: currentUserId,
-    createdAt: "",
-    updatedAt: "",
-    participants: [
-      {
-        id: "",
-        userId: "",
-        chatRoomId: "",
-        joinedAt: "",
-      },
-    ],
-    messages: [
-      {
-        id: "",
-        content: "",
-        type: "MESSAGE",
-        senderId: "",
-        receiverId: "",
-        chatRoomId: "",
-        createdAt: "",
-        updatedAt: "",
-      },
-    ],
-    user: null,
-  };
-
   const { Title } = Typography;
 
   const {
     messages,
     isMessagesLoading,
-    selectedUser,
     selectedChatRoom,
-    setSelectedUser,
     setSelectedChatRoom,
     fetchContacts,
     getMessages,
@@ -77,38 +44,35 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
     sendMessage,
     createDirectChat,
     subscribeToMessages,
-    unsubscribeFromMessages,
+    // unsubscribeFromMessages,
   } = useAppStore();
 
-  // const [selectedChatRoom, setSelectedChatRoom] =
-  //   useState<ChatRoom>(initialChatRoom);
   const [content, setContent] = useState("");
   const [contactsModalVisible, setContactsModalVisible] = useState(false);
-  const [modalType, setModalType] = useState<"direct" | "channel">("direct");
+  const [modalType, setModalType] = useState<"DIRECT" | "GROUP">("DIRECT");
+  const [nameChatRoom, setNameChatRoom] = useState<string>("");
+  const [selectedUser, setSelectedUser] = useState<string>("");
 
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
   const handleSelectChatRoom = (room: ChatRoom) => {
     if (selectedChatRoom?.id !== room.id) {
       setSelectedChatRoom(room); // Only update if the room is different
+      getMessages(room.id);
     }
   };
 
-  // useEffect(() => {
-  //   if (selectedChatRoom && selectedChatRoom.id !== "") {
-  //     getMessages(selectedChatRoom.id);
+  useEffect(() => {
+    if (selectedChatRoom && currentUserId) {
+      const receiver = selectedChatRoom.participants.find(
+        (participant) => participant.userId !== currentUserId
+      );
 
-  //     subscribeToMessages();
-
-  //     return () => unsubscribeFromMessages();
-  //   }
-  // }, [
-  //   selectedChatRoom?.id,
-  //   getMessages,
-  //   subscribeToMessages,
-  //   unsubscribeFromMessages,
-  // ]);
-
+      if (receiver) {
+        setSelectedUser(receiver.userId);
+      }
+    }
+  }, [selectedChatRoom, currentUserId]);
 
   useEffect(() => {
     if (messageEndRef.current && messages) {
@@ -130,8 +94,9 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
   const { data: contactsQuery, isLoading: isLoadingContacts } = useQuery({
     queryKey: ["contacts"],
     queryFn: fetchContacts,
-    select: (data) => data,
     refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const sendMessageMutation = useMutation({
@@ -142,16 +107,15 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
 
         subscribeToMessages();
       }
-      // refetchMessages();
 
       setContent("");
     },
     onError: (error) => {
       toast.error(error.message);
     },
-    onSettled: () => {
-      unsubscribeFromMessages();
-    },
+    // onSettled: () => {
+    //   unsubscribeFromMessages();
+    // },
   });
 
   const createDirectChatMutation = useMutation({
@@ -170,7 +134,7 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
     sendMessageMutation.mutate({
       chatRoomId: selectedChatRoom.id,
       senderId: currentUserId,
-      receiverId: selectedUser?.id ?? "1",
+      receiverId: selectedUser,
       content,
     });
     setContent(""); // Clear the input after sending the message
@@ -187,12 +151,15 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
     if (!selectedUser) return;
     createDirectChatMutation.mutate({
       senderId: currentUserId,
-      receiverId: selectedUser.id,
+      receiverId: selectedUser,
+      type: modalType,
+      name: nameChatRoom,
     });
   };
 
-  const showModal = (type: "direct" | "channel") => {
+  const showModal = (type: "DIRECT" | "GROUP", name: string) => {
     setModalType(type);
+    setNameChatRoom(name);
     setContactsModalVisible(true);
   };
 
@@ -214,11 +181,11 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
               <Button
                 type="text"
                 icon={<PlusOutlined style={{ color: "#96989D" }} />}
-                onClick={() => showModal("direct")}
+                onClick={() => showModal("DIRECT", "hi")}
               />
             </div>
             {isLoadingChatRooms ? (
-              <div style={{ color: "#fff" }}>Loading direct messages...</div>
+              <div style={{ color: "#fff" }}>Loading DIRECT messages...</div>
             ) : (
               <List
                 dataSource={
@@ -229,7 +196,9 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
                 renderItem={(room) => (
                   <List.Item
                     key={room.id}
-                    onClick={() => handleSelectChatRoom(room)}
+                    onClick={() => {
+                      handleSelectChatRoom(room);
+                    }}
                     style={{
                       padding: "8px",
                       cursor: "pointer",
@@ -264,7 +233,7 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
               <Button
                 type="text"
                 icon={<PlusOutlined style={{ color: "#96989D" }} />}
-                onClick={() => showModal("channel")}
+                onClick={() => showModal("GROUP", "GROUP")}
               />
             </div>
             {isLoadingChatRooms ? (
@@ -299,7 +268,6 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
           </div>
         </div>
       </Layout.Sider>
-
       <Layout.Content style={{ background: "#313338" }}>
         {selectedChatRoom && (
           <div
@@ -381,28 +349,47 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
       </Layout.Content>
 
       <Modal
-        title={modalType === "direct" ? "Select Contact" : "Create Channel"}
+        title={modalType === "DIRECT" ? "Select Contact" : "Create Channel"}
         open={contactsModalVisible}
         onCancel={() => setContactsModalVisible(false)}
         footer={[
-          <Button key="back" onClick={() => setContactsModalVisible(false)}>
+          <Button
+            key="back"
+            onClick={(e) => {
+              e.preventDefault();
+              setContactsModalVisible(false);
+            }}
+          >
             Cancel
           </Button>,
-          <Button key="submit" type="primary" onClick={handleCreateDirectChat}>
-            {modalType === "direct" ? "Start Conversation" : "Create Channel"}
+          <Button
+            key="submit"
+            type="primary"
+            onClick={(e) => {
+              e.preventDefault();
+              handleCreateDirectChat();
+            }}
+          >
+            {modalType === "DIRECT" ? "Start Conversation" : "Create Channel"}
           </Button>,
         ]}
       >
         {isLoadingContacts ? (
-          <div>Loading contacts...</div>
+          <div style={{ color: "#fff" }}>Loading contacts...</div>
         ) : (
           <Select
-            value={selectedUser}
-            onChange={setSelectedUser}
+            value={selectedUser} // Use the ID instead of the entire user object
+            onChange={(value) => {
+              const selected = contactsQuery?.find(
+                (contact: User) => contact.id === value
+              );
+
+              if (selected) setSelectedUser(selected.id);
+            }}
             style={{ width: "100%" }}
           >
             {contactsQuery?.map((contact: User) => (
-              <Select.Option key={contact.id} value={contact.userName}>
+              <Select.Option key={contact.id} value={contact.id}>
                 {contact.userName}
               </Select.Option>
             ))}

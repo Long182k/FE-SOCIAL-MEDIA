@@ -1,13 +1,10 @@
 import { StateCreator } from "zustand";
 import { useAppStore } from "..";
 import { ChatRoom, ChatStore } from "../../@util/interface/chat.interface";
-import { User } from "../../@util/types/auth.type";
 import { axiosClient } from "../../api/axiosConfig";
 
 export const createChatState: StateCreator<ChatStore> = (set, get) => ({
   messages: [],
-  users: [],
-  selectedUser: null,
   selectedChatRoom: null,
   isUsersLoading: false,
   isMessagesLoading: false,
@@ -16,8 +13,6 @@ export const createChatState: StateCreator<ChatStore> = (set, get) => ({
     set({ isUsersLoading: true });
     try {
       const res = await axiosClient.get("/users");
-      set({ users: res.data });
-
       return res.data;
     } catch (error) {
       console.log("error", error);
@@ -29,11 +24,11 @@ export const createChatState: StateCreator<ChatStore> = (set, get) => ({
   getChatRoom: async (currentUserId: string): Promise<ChatRoom[]> => {
     try {
       const res = await axiosClient.get(`/chat/room/${currentUserId}`);
-      console.log("res.data", res.data);
-      return res.data; // Assume res.data is an array of ChatRoom
+
+      return res.data;
     } catch (error) {
       console.error("Error fetching chat rooms:", error);
-      return []; // Return an empty array on error
+      return [];
     }
   },
 
@@ -43,6 +38,22 @@ export const createChatState: StateCreator<ChatStore> = (set, get) => ({
       const res = await axiosClient.get(`/chat/message/${chatRoomId}`);
 
       set({ messages: res.data });
+
+      const socket = useAppStore.getState().socket;
+      console.log("🚀  socket getMessages:", socket);
+
+      if (!socket) {
+        console.log("no socket getMessages");
+        return;
+      }
+
+      socket.on("newMessage", (newMessage) => {
+        console.log("🚀  newMessage getMessages:", newMessage);
+
+        set({
+          messages: [...get().messages, newMessage],
+        });
+      });
 
       return res.data;
     } catch (error) {
@@ -54,8 +65,15 @@ export const createChatState: StateCreator<ChatStore> = (set, get) => ({
 
   sendMessage: async (messageData) => {
     const { messages } = get();
+    const socket = useAppStore.getState().socket;
+
     try {
       const res = await axiosClient.post("/chat/message/send", messageData);
+      console.log("🚀  res sendMessage:", res.data);
+
+      if (res) {
+        socket?.emit("sendMessage", res.data);
+      }
       console.log("res.data", res.data);
 
       set({ messages: [...messages, res.data] });
@@ -80,17 +98,16 @@ export const createChatState: StateCreator<ChatStore> = (set, get) => ({
   },
 
   subscribeToMessages: () => {
-    const { selectedUser } = get();
-    if (!selectedUser) return;
-
     const socket = useAppStore.getState().socket;
+    console.log("🚀  socket subscribeToMessages:", socket);
 
-    if (!socket) return;
+    if (!socket) {
+      console.log("no socket subscribeToMessages");
+      return;
+    }
 
     socket.on("newMessage", (newMessage) => {
-      const isMessageSentFromSelectedUser =
-        newMessage.senderId === selectedUser.id;
-      if (!isMessageSentFromSelectedUser) return;
+      console.log("🚀  newMessage subscribeToMessages:", newMessage);
 
       set({
         messages: [...get().messages, newMessage],
@@ -99,13 +116,11 @@ export const createChatState: StateCreator<ChatStore> = (set, get) => ({
   },
 
   unsubscribeFromMessages: () => {
-    console.log("unsubscribeFromMessages");
     const socket = useAppStore.getState().socket;
     if (!socket) return;
     socket.off("newMessage");
   },
 
-  setSelectedUser: (selectedUser: User | null) => set({ selectedUser }),
   setSelectedChatRoom: (selectedChatRoom: ChatRoom | null) =>
     set({ selectedChatRoom }),
 });
