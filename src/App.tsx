@@ -4,18 +4,19 @@ import { useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import CenterContent from "./containers/CenterLayout/CenterContent";
+import Bookmarks from "./routes/Bookmarks";
+import Explore from "./routes/Explore";
+import Groups from "./routes/Groups";
 import HomePage from "./routes/Home";
 import LoginPage from "./routes/Login";
 import Marketplace from "./routes/Marketplace";
-import Explore from "./routes/Explore";
-import Groups from "./routes/Groups";
-import Bookmarks from "./routes/Bookmarks";
 import Messages from "./routes/Messages";
 import Notifications from "./routes/Notifications";
 import Settings from "./routes/Settings";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
+import { useAppStore } from "./store";
 
 const queryClient = new QueryClient();
 
@@ -23,18 +24,21 @@ interface ProtectedRouterProps {
   component: React.ReactElement;
 }
 
-const ProtectedRouter = ({ component }: ProtectedRouterProps) => {
-  const auth = localStorage.getItem("access_token");
-
-  if (auth) {
-    return component;
-  } else {
-    return <Navigate replace to="/login" />;
-  }
-};
-
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const { userInfo } = useAppStore();
+
+  const accessToken =
+    localStorage?.getItem("access_token") || userInfo?.accessToken;
+
+  const ProtectedRouter = ({ component }: ProtectedRouterProps) => {
+    if (accessToken) {
+      return component;
+    } else {
+      return <Navigate replace to="/login" />;
+    }
+  };
 
   const handleThemeChange = (
     checked: boolean | ((prevState: boolean) => boolean)
@@ -55,7 +59,12 @@ function App() {
               path="/"
               element={
                 <ProtectedRouter
-                  component={<HomePage isDarkMode={isDarkMode} handleThemeChange={handleThemeChange} />}
+                  component={
+                    <HomePage
+                      isDarkMode={isDarkMode}
+                      handleThemeChange={handleThemeChange}
+                    />
+                  }
                 />
               }
             >
@@ -64,7 +73,8 @@ function App() {
                 element={
                   <CenterContent
                     isDarkMode={isDarkMode}
-                    handleThemeChange={handleThemeChange}
+                    currentUserId={userInfo?.userId ?? ""}
+                    userAvatar={userInfo?.avatarUrl ?? ""}
                   />
                 }
               />
@@ -86,7 +96,13 @@ function App() {
               />
               <Route
                 path="messages"
-                element={<Messages isDarkMode={isDarkMode} />}
+                element={
+                  <Messages
+                    // isDarkMode={isDarkMode}
+                    // token={accessToken}
+                    currentUserId={userInfo?.userId ?? ""}
+                  />
+                }
               />
               <Route
                 path="notifications"
@@ -94,7 +110,12 @@ function App() {
               />
               <Route
                 path="settings"
-                element={<Settings isDarkMode={isDarkMode} />}
+                element={
+                  <Settings
+                    isDarkMode={isDarkMode}
+                    handleThemeChange={handleThemeChange}
+                  />
+                }
               />
             </Route>
 

@@ -1,23 +1,45 @@
-import axios from "axios";
-import { CreatePostParams } from "../@util/types/post.type";
+import {
+  ApiResponse,
+  CreateCommentDto,
+  CreatePostDto,
+  Post,
+  PostInteractionResponse,
+  PostResponse,
+  UpdatePostDto,
+} from "../@util/types/post.type";
+import { axiosClient } from "./axiosConfig";
 
-const API_URL = import.meta.env.VITE_SERVER_URL;
+export const postApi = {
+  createPost: (data: CreatePostDto | FormData) =>
+    axiosClient.post<ApiResponse<Post>>("/posts", data, {
+      headers: {
+        'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json',
+      },
+    }),
 
-const axiosClient = axios.create({ baseURL: API_URL });
+  getPosts: (params: { page?: number; limit?: number; search?: string }) =>
+    axiosClient.get<PostResponse>("/posts", { params }),
 
-// Setup later ( limit domain to pass the CORS)
-// const config: AxiosRequestConfig = { withCredentials: true };
+  getPost: (id: string) => axiosClient.get<ApiResponse<Post>>(`/posts/${id}`),
 
-// Automatically add access token to every request if available
-axiosClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
-  if (token) {
-    config.headers["Authorization"] = `Bearer ${token}`;
-  }
-  return config;
-});
+  updatePost: (id: string, data: UpdatePostDto) =>
+    axiosClient.patch<ApiResponse<Post>>(`/posts/${id}`, data),
 
-export const createNewPost = (data: CreatePostParams) =>
-  axiosClient.post(`/posts`, data);
+  deletePost: (id: string) => axiosClient.delete(`/posts/${id}`),
 
-export const getAllPosts = () => axiosClient.get(`/posts`);
+  likePost: (id: string) =>
+    axiosClient.post<PostInteractionResponse>(`/posts/${id}/like`),
+
+  commentPost: (id: string, data: CreateCommentDto) => {
+    return axiosClient.post<ApiResponse<Comment>>(
+      `/posts/${id}/comment`,
+      data
+    );
+  },
+
+  bookmarkPost: (id: string) =>
+    axiosClient.post<PostInteractionResponse>(`/posts/${id}/bookmark`),
+
+  getBookmarks: (params: { page?: number; limit?: number }) =>
+    axiosClient.get<PostResponse>("/posts/bookmarks", { params }),
+};
