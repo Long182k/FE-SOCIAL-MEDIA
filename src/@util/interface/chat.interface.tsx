@@ -5,7 +5,7 @@ export interface Participant {
   id: string;
   userId: string;
   chatRoomId: string;
-  joinedAt: string; // ISO 8601 date string
+  joinedAt: string;
 }
 
 export interface CreateDirectChatResponse {
@@ -13,8 +13,8 @@ export interface CreateDirectChatResponse {
   name: string;
   type: "DIRECT" | "GROUP";
   creatorId: string;
-  createdAt: string; // ISO 8601 date string
-  updatedAt: string; // ISO 8601 date string
+  createdAt: string;
+  updatedAt: string;
   userId: string | null;
   participants: Participant[];
 }
@@ -22,19 +22,19 @@ export interface CreateDirectChatResponse {
 export interface SendMessageResponse {
   id: string;
   content: string;
-  type: "MESSAGE" | "IMAGE" | "VIDEO"; // Expand based on supported message types
+  type: "MESSAGE" | "image" | "video";
   senderId: string;
   receiverId: string;
   chatRoomId: string;
-  createdAt: string; // ISO 8601 date string
-  updatedAt: string; // ISO 8601 date string
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ChatParticipant {
   id: string;
   userId: string;
   chatRoomId: string;
-  joinedAt: string; // ISO 8601 date string
+  joinedAt: string;
   user?: {
     id: string;
     userName: string;
@@ -44,12 +44,12 @@ export interface ChatParticipant {
 export interface ChatMessageResponse {
   id: string;
   content: string;
-  type: "MESSAGE" | "IMAGE" | "VIDEO"; // Expand based on supported message types
+  type: "MESSAGE" | "image" | "video";
   senderId: string;
   receiverId: string;
   chatRoomId: string;
-  createdAt: string; // ISO 8601 date string
-  updatedAt: string; // ISO 8601 date string
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ChatRoom {
@@ -58,7 +58,7 @@ export interface ChatRoom {
   type: "DIRECT" | "GROUP";
   creatorId: string;
   createdAt: string; // ISO 8601 date string
-  updatedAt: string; // ISO 8601 date string
+  updatedAt: string;
   userId: string | null;
   participants: ChatParticipant[];
   messages?: ChatMessageResponse[];
@@ -70,15 +70,15 @@ export interface ChatRoomResponse {
 }
 
 export interface GetMessageResponse {
-  id: string;
+  id?: string;
   content: string;
-  type: "MESSAGE" | "IMAGE" | "VIDEO"; // Expand based on supported message types
+  type?: "MESSAGE" | "image" | "video";
   senderId: string;
   receiverId: string;
-  chatRoomId: string;
-  createdAt: string; // ISO 8601 date string
-  updatedAt: string; // ISO 8601 date string
-  user: {
+  chatRoomId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  user?: {
     id: string;
     userName: string;
     email: string;
@@ -89,15 +89,15 @@ export interface GetMessageResponse {
     avatarUrl: string | null;
     bio: string | null;
     isActive: boolean;
-    createdAt: string; // ISO 8601 date string
+    createdAt: string;
   };
 }
 
 export interface ChatStore {
-  messages: GetMessageResponse[]; // Array of messages
-  selectedChatRoom: null | ChatRoom; // Currently selected user
-  isUsersLoading: boolean; // Loading state for fetching users
-  isMessagesLoading: boolean; // Loading state for fetching messages
+  messages: GetMessageResponse[];
+  selectedChatRoom: null | ChatRoom;
+  isUsersLoading: boolean;
+  isMessagesLoading: boolean;
 
   fetchContacts: () => Promise<User[]>;
   getMessages: (chatRoomId: string) => Promise<GetMessageResponse[]>;
@@ -108,7 +108,7 @@ export interface ChatStore {
     senderId: string;
     receiverId: string;
     content: string;
-  }) => Promise<SendMessageResponse>;
+  }) => Promise<void>;
 
   createDirectChat: (directChatData: {
     senderId: string;

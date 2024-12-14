@@ -73,7 +73,8 @@ function App() {
                 element={
                   <CenterContent
                     isDarkMode={isDarkMode}
-                    handleThemeChange={handleThemeChange}
+                    currentUserId={userInfo?.userId ?? ""}
+                    userAvatar={userInfo?.avatarUrl ?? ""}
                   />
                 }
               />
@@ -109,7 +110,12 @@ function App() {
               />
               <Route
                 path="settings"
-                element={<Settings isDarkMode={isDarkMode} />}
+                element={
+                  <Settings
+                    isDarkMode={isDarkMode}
+                    handleThemeChange={handleThemeChange}
+                  />
+                }
               />
             </Route>
 

@@ -35,6 +35,7 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
 
   const {
     messages,
+    socket,
     isMessagesLoading,
     selectedChatRoom,
     setSelectedChatRoom,
@@ -44,7 +45,7 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
     sendMessage,
     createDirectChat,
     subscribeToMessages,
-    // unsubscribeFromMessages,
+    unsubscribeFromMessages,
   } = useAppStore();
 
   const [content, setContent] = useState("");
@@ -80,6 +81,14 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
     }
   }, [messages]);
 
+  useEffect(() => {
+    subscribeToMessages();
+
+    return () => {
+      unsubscribeFromMessages();
+    };
+  }, [socket, subscribeToMessages, unsubscribeFromMessages]);
+
   const {
     data: chatRoomsQuery,
     isLoading: isLoadingChatRooms,
@@ -102,11 +111,9 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
   const sendMessageMutation = useMutation({
     mutationFn: sendMessage,
     onSuccess: () => {
-      if (selectedChatRoom && selectedChatRoom.id) {
-        getMessages(selectedChatRoom.id);
-
-        subscribeToMessages();
-      }
+      // if (selectedChatRoom && selectedChatRoom.id) {
+      //   getMessages(selectedChatRoom.id);
+      // }
 
       setContent("");
     },
@@ -131,12 +138,14 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
 
   const handleSendMessage = () => {
     if (!content.trim() || !selectedChatRoom) return;
-    sendMessageMutation.mutate({
+
+    const newMsg = {
       chatRoomId: selectedChatRoom.id,
       senderId: currentUserId,
       receiverId: selectedUser,
       content,
-    });
+    };
+    sendMessageMutation.mutate(newMsg);
     setContent(""); // Clear the input after sending the message
   };
 
@@ -286,20 +295,20 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
                         message.senderId === currentUserId ? "right" : "left"
                       }`}
                     >
-                      {message.senderId !== currentUserId && (
+                      {message.user && message.senderId !== currentUserId && (
                         <Avatar
                           src={message.user.avatarUrl}
                           className="avatar"
                         />
                       )}
                       <div className="bubble">
-                        <Text className="author">{message.user.userName}</Text>
+                        <Text className="author">{message.user?.userName}</Text>
                         <p className="content">{message.content}</p>
                         <Text className="timestamp">
-                          {convertToHumanTime(message.createdAt)}
+                          {convertToHumanTime(message?.createdAt ?? "")}
                         </Text>
                       </div>
-                      {message.senderId === currentUserId && (
+                      {message.user && message.senderId === currentUserId && (
                         <Avatar
                           src={message.user.avatarUrl}
                           className="avatar"

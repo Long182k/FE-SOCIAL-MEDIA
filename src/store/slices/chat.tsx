@@ -39,21 +39,21 @@ export const createChatState: StateCreator<ChatStore> = (set, get) => ({
 
       set({ messages: res.data });
 
-      const socket = useAppStore.getState().socket;
-      console.log("🚀  socket getMessages:", socket);
+      // const socket = useAppStore.getState().socket;
+      // console.log("🚀  socket getMessages:", socket);
 
-      if (!socket) {
-        console.log("no socket getMessages");
-        return;
-      }
+      // if (!socket) {
+      //   console.log("no socket getMessages");
+      //   return;
+      // }
 
-      socket.on("newMessage", (newMessage) => {
-        console.log("🚀  newMessage getMessages:", newMessage);
+      // socket.on("newMessage", (newMessage) => {
+      //   console.log("🚀  newMessage getMessages:", newMessage);
 
-        set({
-          messages: [...get().messages, newMessage],
-        });
-      });
+      //   set({
+      //     messages: [...get().messages, newMessage],
+      //   });
+      // });
 
       return res.data;
     } catch (error) {
@@ -69,16 +69,14 @@ export const createChatState: StateCreator<ChatStore> = (set, get) => ({
 
     try {
       const res = await axiosClient.post("/chat/message/send", messageData);
-      console.log("🚀  res sendMessage:", res.data);
+      // console.log("🚀  res sendMessage:", res.data);
 
-      if (res) {
+      if (socket) {
         socket?.emit("sendMessage", res.data);
       }
-      console.log("res.data", res.data);
+      // console.log("res.data", res.data);
 
       set({ messages: [...messages, res.data] });
-
-      return res.data;
     } catch (error) {
       console.log("error", error);
     }
