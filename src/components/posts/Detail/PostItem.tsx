@@ -143,21 +143,24 @@ const PostItem = ({
           </Space>
 
           {/* Action buttons */}
+
           <Space>
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              className={isDarkMode ? "dark" : ""}
-              onClick={() => onEdit?.(post)}
-              disabled={!isOwner}
-            />
-            <Button
-              type="text"
-              icon={<DeleteOutlined />}
-              className={isDarkMode ? "dark" : ""}
-              onClick={() => handleDeletePost?.(post.id)}
-              disabled={!isOwner}
-            />
+            {isOwner && (
+              <>
+                <Button
+                  type="text"
+                  icon={<EditOutlined />}
+                  className={isDarkMode ? "dark" : ""}
+                  onClick={() => onEdit?.(post)}
+                />
+                <Button
+                  type="text"
+                  icon={<DeleteOutlined />}
+                  className={isDarkMode ? "dark" : ""}
+                  onClick={() => handleDeletePost?.(post.id)}
+                />
+              </>
+            )}
           </Space>
         </Space>
 
