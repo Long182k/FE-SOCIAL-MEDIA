@@ -3,11 +3,22 @@ import {
   CloseCircleOutlined,
   SmileOutlined,
 } from "@ant-design/icons";
-import { Avatar, Button, Card, Input, Space, Upload, message } from "antd";
+import {
+  Avatar,
+  Button,
+  Card,
+  Input,
+  Space,
+  Upload,
+  message,
+  Popover,
+} from "antd";
 import { RcFile } from "antd/es/upload";
 import { KeyboardEvent, useState } from "react";
 import { CreatePostDto } from "../../../@util/types/post.type";
 import "./index.css";
+import EmojiPicker from "emoji-picker-react";
+import { EmojiClickData, Theme } from "emoji-picker-react";
 
 interface CreatePostFormProps {
   onSubmit: (values: CreatePostDto, files?: RcFile[]) => void;
@@ -23,6 +34,7 @@ const CreatePostForm = ({
   const [content, setContent] = useState("");
   const [fileList, setFileList] = useState<RcFile[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const handleSubmit = async () => {
     if (!content.trim() && fileList.length === 0) return;
@@ -78,12 +90,27 @@ const CreatePostForm = ({
     setFileList(newFileList);
   };
 
+  const onEmojiClick = (emojiData: EmojiClickData) => {
+    const emoji = emojiData.emoji;
+    setContent((prevContent) => prevContent + emoji);
+    setShowEmojiPicker(false);
+  };
+
+  const emojiPickerContent = (
+    <div style={{ backgroundColor: isDarkMode ? "#242526" : "#ffffff" }}>
+      <EmojiPicker
+        onEmojiClick={onEmojiClick}
+        theme={isDarkMode ? Theme.DARK : Theme.LIGHT}
+      />
+    </div>
+  );
+
   return (
     <Card
-      bodyStyle={{ padding: "16px" }}
       className={`create-post-card ${isDarkMode ? "dark" : "light"}`}
       style={{
         borderRadius: "8px",
+        padding: "16px",
         backgroundColor: isDarkMode ? "#242526" : "#ffffff",
       }}
     >
@@ -170,14 +197,22 @@ const CreatePostForm = ({
                   Photo/Video
                 </Button>
               </Upload>
-              <Button
-                type="text"
-                icon={<SmileOutlined />}
-                className={isDarkMode ? "dark" : ""}
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              <Popover
+                content={emojiPickerContent}
+                trigger="click"
+                open={showEmojiPicker}
+                onOpenChange={setShowEmojiPicker}
+                placement="topRight"
               >
-                Feeling
-              </Button>
+                <Button
+                  type="text"
+                  icon={<SmileOutlined />}
+                  className={isDarkMode ? "dark" : ""}
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  Feeling
+                </Button>
+              </Popover>
             </Space>
 
             <Button

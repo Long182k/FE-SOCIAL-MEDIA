@@ -114,9 +114,9 @@ function Groups({ isDarkMode }: GroupsProps): JSX.Element {
               style={{
                 background: isDarkMode ? "#1f1f1f" : "#ffffff",
                 borderRadius: "8px",
+                padding: 0,
                 border: `1px solid ${isDarkMode ? "#303030" : "#f0f0f0"}`,
               }}
-              bodyStyle={{ padding: 0 }}
               cover={
                 <div
                   style={{

@@ -62,6 +62,7 @@ export const formatTimeAgo = (date: Date): string => {
 };
 
 export const isVideoUrl = (url: string): boolean => {
-  return url.match(/\.(mp4|webm|ogg)$/) !== null || 
-         url.includes('/video/upload/');
+  return (
+    url.match(/\.(mp4|webm|ogg)$/) !== null || url.includes("/video/upload/")
+  );
 };

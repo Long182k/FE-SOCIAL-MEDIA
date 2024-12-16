@@ -1,42 +1,43 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, Card, Layout, List, Spin } from "antd";
+import { RcFile } from "antd/es/upload";
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
   CreatePostDto,
   Post,
-  UpdatePostDto
+  UpdatePostDto,
 } from "../../@util/types/post.type";
 import { postApi } from "../../api/post";
 import CreatePostForm from "../../components/posts/CreatePostForm";
 import PostItem from "../../components/posts/Detail/PostItem";
 import EditPostModal from "../../components/posts/EditPostModal";
 import StoryList from "../../components/posts/Stories";
-import { RcFile } from "antd/es/upload";
-
 const { Content } = Layout;
 
 interface CenterContentProps {
   isDarkMode: boolean;
   currentUserId: string;
   userAvatar: string;
-
 }
 
-const CenterContent = ({ isDarkMode, currentUserId ,userAvatar}: CenterContentProps) => {
-  const [searchParams, setSearchParams] = useSearchParams();
+const CenterContent = ({
+  isDarkMode,
+  currentUserId,
+  userAvatar,
+}: CenterContentProps) => {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const queryClient = useQueryClient();
 
-  const page = Number(searchParams.get("page")) || 1;
-  const limit = Number(searchParams.get("limit")) || 10;
-  const search = searchParams.get("search") || "";
-
-  const {data: postsQuery, refetch: refetchPosts, isLoading: isLoadingPosts, isError: isErrorPosts} = useQuery({
-    queryKey: ["posts", { page, limit, search }],
+  const {
+    data: postsQuery,
+    refetch: refetchPosts,
+    isLoading: isLoadingPosts,
+    isError: isErrorPosts,
+  } = useQuery({
+    queryKey: ["posts"],
     select: (data) => data.data,
-    queryFn: () => postApi.getPosts({ page, limit, search }),
+    queryFn: () => postApi.getPosts(),
   });
 
   // Mutations
@@ -52,11 +53,11 @@ const CenterContent = ({ isDarkMode, currentUserId ,userAvatar}: CenterContentPr
 
   const handleCreatePost = (values: CreatePostDto, files?: RcFile[]): void => {
     const formData = new FormData();
-    formData.append('content', values.content);
-    
+    formData.append("content", values.content);
+
     if (files && files.length > 0) {
-      files.forEach(file => {
-        formData.append('files', file);
+      files.forEach((file) => {
+        formData.append("files", file);
       });
     }
 
@@ -84,16 +85,15 @@ const CenterContent = ({ isDarkMode, currentUserId ,userAvatar}: CenterContentPr
     }
   };
 
-  const handlePageChange = (newPage: number): void => {
-    setSearchParams({ page: String(newPage), limit: String(limit), search });
-  };
-
-
   return (
     <Content style={{ padding: "0 24px" }}>
       <StoryList isDarkMode={isDarkMode} />
       <Card style={{ marginBottom: 16 }}>
-        <CreatePostForm onSubmit={handleCreatePost} isDarkMode={isDarkMode} userAvatar={userAvatar} />
+        <CreatePostForm
+          onSubmit={handleCreatePost}
+          isDarkMode={isDarkMode}
+          userAvatar={userAvatar}
+        />
       </Card>
 
       {isLoadingPosts ? (
@@ -103,12 +103,6 @@ const CenterContent = ({ isDarkMode, currentUserId ,userAvatar}: CenterContentPr
       ) : (
         <List
           size="large"
-          pagination={{
-            current: page,
-            pageSize: limit,
-            total: postsQuery?.meta?.total,
-            onChange: handlePageChange,
-          }}
           dataSource={postsQuery?.data || []}
           renderItem={(post: Post) => (
             <PostItem

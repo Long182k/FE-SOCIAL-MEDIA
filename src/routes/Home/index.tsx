@@ -1,17 +1,12 @@
-import {
-  BulbOutlined,
-  LogoutOutlined,
-  SearchOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { Avatar, Input, Layout, Switch, Tooltip, Typography } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import { Avatar, Input, Layout, Typography } from "antd";
 import "antd/dist/reset.css";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { getTextColor } from "../../@util/helpers";
 import SidebarLeft from "../../containers/Sidebar/SidebarLeft";
 import SiderRight from "../../containers/Sidebar/SidebarRight";
-import "./index.css";
 import { useAppStore } from "../../store";
+import "./index.css";
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -23,14 +18,9 @@ interface HomePageProps {
   ) => void;
 }
 
-const HomePage = ({ isDarkMode, handleThemeChange }: HomePageProps) => {
-  const navigate = useNavigate();
-  const { userInfo, logout } = useAppStore();
+const HomePage = ({ isDarkMode }: HomePageProps) => {
+  const { userInfo } = useAppStore();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
   return (
     <Layout className="homepage-layout">
       <SidebarLeft isDarkMode={isDarkMode} />
@@ -62,25 +52,10 @@ const HomePage = ({ isDarkMode, handleThemeChange }: HomePageProps) => {
             className="header-right"
             style={{ display: "flex", alignItems: "center" }}
           >
-            <Text style={getTextColor(isDarkMode)}>{userInfo.userName}</Text>
-            <Avatar icon={<UserOutlined />} />
-            <Tooltip
-              title={
-                isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"
-              }
-            >
-              <Switch
-                checkedChildren={<BulbOutlined />}
-                unCheckedChildren={<BulbOutlined />}
-                checked={isDarkMode}
-                onChange={handleThemeChange}
-              />
-            </Tooltip>
-            <Avatar
-              icon={<LogoutOutlined />}
-              className="logout-icon"
-              onClick={handleLogout}
-            />
+            <Avatar src={userInfo.avatarUrl} size={40} />
+            <Text strong style={getTextColor(isDarkMode)}>
+              {userInfo.userName}
+            </Text>
           </div>
         </Header>
 

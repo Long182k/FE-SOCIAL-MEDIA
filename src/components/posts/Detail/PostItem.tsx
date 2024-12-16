@@ -3,7 +3,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   LikeOutlined,
-  ShareAltOutlined,
+  SaveOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Avatar, Button, Card, Image, Input, Space, Typography } from "antd";
@@ -14,7 +14,10 @@ import { CreateCommentDto, Post } from "../../../@util/types/post.type";
 import { postApi } from "../../../api/post";
 import CommentItem from "./CommentItem";
 import "./PostItem.css";
-
+import { bookmarkApi } from "../../../api/bookmark";
+import { renderContent } from "../../generalRender/renderContent";
+import Plyr from "plyr-react";
+import "plyr-react/plyr.css";
 interface PostItemProps {
   post: Post;
   currentUserId: string;
@@ -32,8 +35,6 @@ const PostItem = ({
   onEdit,
   refetchPosts,
 }: PostItemProps) => {
-  console.log("🚀  post:PostItem", post);
-
   const queryClient = useQueryClient();
 
   const [commentModalVisible, setCommentModalVisible] = useState(false);
@@ -54,7 +55,7 @@ const PostItem = ({
   });
 
   const bookmarkPostMutation = useMutation({
-    mutationFn: postApi.bookmarkPost,
+    mutationFn: bookmarkApi.bookmarkPost,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       toast.success("Post bookmarked!");
@@ -143,21 +144,24 @@ const PostItem = ({
           </Space>
 
           {/* Action buttons */}
+
           <Space>
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              className={isDarkMode ? "dark" : ""}
-              onClick={() => onEdit?.(post)}
-              disabled={!isOwner}
-            />
-            <Button
-              type="text"
-              icon={<DeleteOutlined />}
-              className={isDarkMode ? "dark" : ""}
-              onClick={() => handleDeletePost?.(post.id)}
-              disabled={!isOwner}
-            />
+            {isOwner && (
+              <>
+                <Button
+                  type="text"
+                  icon={<EditOutlined />}
+                  className={isDarkMode ? "dark" : ""}
+                  onClick={() => onEdit?.(post)}
+                />
+                <Button
+                  type="text"
+                  icon={<DeleteOutlined />}
+                  className={isDarkMode ? "dark" : ""}
+                  onClick={() => handleDeletePost?.(post.id)}
+                />
+              </>
+            )}
           </Space>
         </Space>
 
@@ -168,24 +172,35 @@ const PostItem = ({
             color: isDarkMode ? "#e4e6eb" : "inherit",
           }}
         >
-          {post.content}
+          {renderContent(post.content, isDarkMode)}
         </Typography.Paragraph>
 
         {post.attachments &&
           post.attachments.map((attachment) => (
             <div key={attachment.id}>
               {isVideoUrl(attachment.url) ? (
-                <video
-                  controls
-                  style={{
-                    width: "100%",
-                    maxHeight: "400px",
-                    objectFit: "contain",
+                <Plyr
+                  source={{
+                    type: "video",
+                    sources: [
+                      {
+                        src: attachment.url,
+                        type: "video/mp4",
+                      },
+                    ],
                   }}
-                >
-                  <source src={attachment.url} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
+                  options={{
+                    controls: [
+                      "play",
+                      "progress",
+                      "current-time",
+                      "mute",
+                      "volume",
+                      "fullscreen",
+                    ],
+                    ratio: "16:9",
+                  }}
+                />
               ) : (
                 <Image
                   src={attachment.url}
@@ -236,7 +251,7 @@ const PostItem = ({
             <Button
               type="text"
               icon={
-                <ShareAltOutlined
+                <SaveOutlined
                   style={{ color: isBookmarked ? "#1677ff" : undefined }}
                 />
               }

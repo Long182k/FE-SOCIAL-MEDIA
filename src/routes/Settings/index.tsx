@@ -1,5 +1,7 @@
 import { LogoutOutlined, SunOutlined } from "@ant-design/icons";
 import { Button, Card, Layout, Space, Switch, theme, Typography } from "antd";
+import { useNavigate } from "react-router-dom";
+import { useAppStore } from "../../store";
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -12,11 +14,14 @@ type SettingsPageProps = {
 };
 
 const SettingsPage = ({ isDarkMode, handleThemeChange }: SettingsPageProps) => {
+  const navigate = useNavigate();
+
   const { token } = theme.useToken();
+  const { logout } = useAppStore();
 
   const handleLogout = () => {
-    // Implement your logout logic here
-    console.log("Logging out...");
+    logout();
+    navigate("/login");
   };
 
   const cardStyle = {
