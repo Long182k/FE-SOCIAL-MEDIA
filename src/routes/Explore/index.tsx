@@ -60,8 +60,8 @@ function Explore({ isDarkMode }: ExploreProps): JSX.Element {
                 borderRadius: "12px",
                 overflow: "hidden",
                 border: "none",
+                padding: "16px"
               }}
-              bodyStyle={{ padding: "16px" }}
               cover={
                 <div style={{ height: "300px", overflow: "hidden" }}>
                   <img

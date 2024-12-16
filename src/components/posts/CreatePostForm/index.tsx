@@ -107,10 +107,10 @@ const CreatePostForm = ({
 
   return (
     <Card
-      bodyStyle={{ padding: "16px" }}
       className={`create-post-card ${isDarkMode ? "dark" : "light"}`}
       style={{
         borderRadius: "8px",
+        padding: "16px",
         backgroundColor: isDarkMode ? "#242526" : "#ffffff",
       }}
     >

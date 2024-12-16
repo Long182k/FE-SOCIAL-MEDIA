@@ -1,4 +1,3 @@
-import { RcFile } from "antd/es/upload";
 import { User } from "./auth.type";
 
 export type MediaType = "image" | "video";
