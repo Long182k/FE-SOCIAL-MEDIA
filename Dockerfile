@@ -22,11 +22,11 @@ COPY . .
 # Build the application
 RUN pnpm run build
 
-# Install serve to serve the static files
-RUN npm install -g serve
+# Install a lightweight HTTP server
+RUN npm install -g http-server
 
 # Expose the port (will be overridden by Railway's PORT env var)
 EXPOSE ${PORT:-3000}
 
 # Start command using environment variable PORT with fallback to 3000
-CMD serve -s dist -p ${PORT:-3000} 
+CMD ["sh", "-c", "http-server dist -p ${PORT:-3000} --proxy http://localhost:${PORT:-3000}?"]
