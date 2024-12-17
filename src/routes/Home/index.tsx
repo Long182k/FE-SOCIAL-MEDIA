@@ -13,9 +13,6 @@ const { Text } = Typography;
 
 interface HomePageProps {
   isDarkMode: boolean;
-  handleThemeChange: (
-    checked: boolean | ((prevState: boolean) => boolean)
-  ) => void;
 }
 
 const HomePage = ({ isDarkMode }: HomePageProps) => {

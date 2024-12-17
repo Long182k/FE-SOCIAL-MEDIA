@@ -1,0 +1,56 @@
+.group-list-container {
+  padding: 24px;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.create-group-button {
+  margin-bottom: 16px;
+}
+
+.group-card {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.group-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.group-cover-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.group-cover-image img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.group-card:hover .group-cover-image img {
+  transform: scale(1.05);
+}
+
+.group-info {
+  margin-bottom: 8px;
+}
+
+.group-member-count {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.join-button {
+  height: 40px;
+  border-radius: 6px;
+}
