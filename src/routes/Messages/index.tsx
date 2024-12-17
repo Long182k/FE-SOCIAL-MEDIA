@@ -22,7 +22,7 @@ import { User } from "../../@util/types/auth.type";
 import { convertToHumanTime } from "../../@util/helpers";
 import { ChatRoom } from "../../@util/interface/chat.interface";
 import { useAppStore } from "../../store";
-import "./Chat.css"; // Custom CSS for chat bubble styles
+import "./chat.css"; // Custom CSS for chat bubble styles
 
 const { Text } = Typography;
 
