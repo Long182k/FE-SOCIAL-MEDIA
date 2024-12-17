@@ -25,12 +25,18 @@ RUN pnpm run build
 # Install a lightweight HTTP server
 RUN npm install -g http-server
 
-# Create a startup script
-RUN echo '#!/bin/sh\nhttp-server dist -p "${PORT:-3000}" --proxy http://localhost:"${PORT:-3000}"?' > start.sh && \
-    chmod +x start.sh
+# Create a startup script in the working directory
+COPY <<'EOF' /app/start.sh
+#!/bin/sh
+PORT="${PORT:-3000}"
+exec http-server dist -p "$PORT"
+EOF
+
+# Make the script executable
+RUN chmod +x /app/start.sh
 
 # Expose default port
 EXPOSE 3000
 
 # Start command
-CMD ["./start.sh"]
+CMD ["/app/start.sh"]
