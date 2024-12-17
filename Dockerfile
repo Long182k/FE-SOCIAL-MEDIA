@@ -23,13 +23,13 @@ COPY . .
 RUN pnpm run build
 
 # Install a lightweight HTTP server
-RUN npm install -g http-server
+RUN npm install -g serve
 
 # Create a startup script in the working directory
 COPY <<'EOF' /app/start.sh
 #!/bin/sh
 PORT="${PORT:-3000}"
-exec http-server dist -p "$PORT"
+exec serve -s dist -l "$PORT"
 EOF
 
 # Make the script executable
