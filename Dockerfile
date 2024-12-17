@@ -25,8 +25,12 @@ RUN pnpm run build
 # Install a lightweight HTTP server
 RUN npm install -g http-server
 
-# Expose the port (will be overridden by Railway's PORT env var)
-EXPOSE ${PORT:-3000}
+# Create a startup script
+RUN echo '#!/bin/sh\nhttp-server dist -p "${PORT:-3000}" --proxy http://localhost:"${PORT:-3000}"?' > start.sh && \
+    chmod +x start.sh
 
-# Start command using environment variable PORT with fallback to 3000
-CMD ["sh", "-c", "http-server dist -p ${PORT:-3000} --proxy http://localhost:${PORT:-3000}?"]
+# Expose default port
+EXPOSE 3000
+
+# Start command
+CMD ["./start.sh"]
