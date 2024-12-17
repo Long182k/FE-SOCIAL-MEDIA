@@ -28,15 +28,16 @@ RUN npm install -g serve
 # Create a startup script in the working directory
 COPY <<'EOF' /app/start.sh
 #!/bin/sh
-PORT="${PORT:-3000}"
+# Use PORT from environment or default to 8080 (Railway's preferred port)
+PORT="${PORT:-8080}"
 exec serve -s dist -l "$PORT"
 EOF
 
 # Make the script executable
 RUN chmod +x /app/start.sh
 
-# Expose default port
-EXPOSE 3000
+# Expose the port that Railway expects
+EXPOSE 8080
 
 # Start command
 CMD ["/app/start.sh"]
