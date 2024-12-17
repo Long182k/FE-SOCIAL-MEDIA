@@ -59,12 +59,7 @@ function App() {
               path="/"
               element={
                 <ProtectedRouter
-                  component={
-                    <HomePage
-                      isDarkMode={isDarkMode}
-                      handleThemeChange={handleThemeChange}
-                    />
-                  }
+                  component={<HomePage isDarkMode={isDarkMode} />}
                 />
               }
             >
@@ -87,7 +82,7 @@ function App() {
                 element={<Marketplace isDarkMode={isDarkMode} />}
               />
               <Route
-                path="groups"
+                path="groups/*"
                 element={<Groups isDarkMode={isDarkMode} />}
               />
               <Route
