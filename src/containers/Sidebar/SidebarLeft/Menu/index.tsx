@@ -2,13 +2,20 @@ import { Menu } from "antd";
 import "./menuItems.css";
 import { MenuItemsProps } from "./menuItems.interface";
 import { navRoutes } from "./navRoutes";
+import { useLocation } from "react-router-dom";
 
 function MenuItems({ isDarkMode }: MenuItemsProps): JSX.Element {
+  const location = useLocation();
+  console.log("🚀  location:", location)
+  // Get the current path without the leading slash
+  const currentPath = location.pathname.substring(1) || "home";
+  console.log("🚀  currentPath:", currentPath)
+
   return (
     <Menu
       className="menu-sider-left"
       mode="inline"
-      defaultSelectedKeys={["home"]}
+      selectedKeys={[currentPath]}
       style={{ borderRight: 0 }}
       theme={isDarkMode ? "dark" : "light"}
       items={navRoutes.map((item) => ({

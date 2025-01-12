@@ -1,7 +1,6 @@
 import {
   HomeOutlined,
   SearchOutlined,
-  ShopOutlined,
   UsergroupAddOutlined,
   BookOutlined,
   MessageOutlined,
@@ -20,11 +19,6 @@ export const navRoutes = [
     key: "explore",
     icon: <SearchOutlined />,
     label: <Link to="/explore">Explore</Link>,
-  },
-  {
-    key: "marketplace",
-    icon: <ShopOutlined />,
-    label: <Link to="/marketplace">Marketplace</Link>,
   },
   {
     key: "groups",
