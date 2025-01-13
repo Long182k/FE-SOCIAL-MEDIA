@@ -217,7 +217,12 @@ function GroupList({ isDarkMode }: GroupListProps) {
             Create Group
           </Button>
         </div>
-        <Tabs activeKey={groupType} onChange={handleTabChange} items={items} />
+        <Tabs
+          activeKey={groupType}
+          onChange={handleTabChange}
+          items={items}
+          className={`groups-tab-container ${isDarkMode ? "dark" : ""}`}
+        />
 
         <Modal
           title="Create New Group"

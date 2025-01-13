@@ -4,6 +4,7 @@ import {
   EnvironmentOutlined,
   PlusOutlined,
   UploadOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -27,9 +28,15 @@ import {
 import { UploadFile } from "antd/es/upload/interface";
 import dayjs from "dayjs";
 import { useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
-import { Event, eventApi, EventCategory } from "../../api/event";
+import { useLocation, useSearchParams, useNavigate } from "react-router-dom";
+import {
+  CreateEventCategory,
+  Event,
+  eventApi,
+  EventCategory,
+} from "../../api/event";
 import { useAppStore } from "../../store";
+import { toast } from "react-toastify";
 
 interface ExploreProps {
   isDarkMode: boolean;
@@ -53,35 +60,39 @@ function Explore({ isDarkMode }: ExploreProps) {
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const { userInfo } = useAppStore();
+  const navigate = useNavigate();
 
-  const currentTab = searchParams.get("tab") || "trending";
+  const currentTab = searchParams.get("tab") || "my-events";
   const currentCategory = searchParams.get("category") as EventCategory;
   const page = parseInt(searchParams.get("page") || "1");
 
   // Queries
-  const trendingEvents = useQuery({
-    queryKey: ["events", "trending"],
-    queryFn: () => eventApi.getTrendingEvents(),
-    enabled: currentTab === "trending",
+  const myEvents = useQuery({
+    queryKey: ["events", "my-events", page],
+    queryFn: () => eventApi.getMyEvents(page),
+    enabled: currentTab === "my-events",
   });
 
-  const allEvents = useQuery({
-    queryKey: ["events", "all", page],
-    queryFn: () => eventApi.getAllEvents(page),
+  const discoveryEvents = useQuery({
+    queryKey: ["events", "discover", page],
+    queryFn: () => eventApi.getDiscoveryEvents(page),
     enabled: currentTab === "discover",
   });
 
   const categoryEvents = useQuery({
     queryKey: ["events", "category", currentCategory, page],
     queryFn: () => eventApi.getEventsByCategory(currentCategory, page),
-    enabled: !!currentCategory,
+    enabled:
+      !!currentCategory &&
+      currentCategory !== "TRENDING" &&
+      currentTab === "discover",
   });
 
-  const discoveryEvents = useQuery({
-    queryKey: ["events", "discover", page],
-    select: (data) => data.data.events,
-    queryFn: () => eventApi.getDiscoveryEvents(page),
-    enabled: currentTab === "discover" && !currentCategory,
+  // Add trending events query
+  const trendingEvents = useQuery({
+    queryKey: ["events", "trending"],
+    queryFn: () => eventApi.getTrendingEvents(),
+    enabled: currentTab === "discover" && currentCategory === "TRENDING",
   });
 
   // Mutations
@@ -100,6 +111,7 @@ function Explore({ isDarkMode }: ExploreProps) {
     onSuccess: () => {
       message.success("Join request sent");
       queryClient.invalidateQueries({ queryKey: ["events"] });
+      queryClient.invalidateQueries({ queryKey: ["eventRequests"] });
     },
   });
 
@@ -111,7 +123,7 @@ function Explore({ isDarkMode }: ExploreProps) {
     });
   };
 
-  const handleCategoryChange = (value: EventCategory | undefined) => {
+  const handleCategoryChange = (value: string | undefined) => {
     setSearchParams((prev) => {
       const newParams = new URLSearchParams(prev);
       if (value) {
@@ -161,6 +173,13 @@ function Explore({ isDarkMode }: ExploreProps) {
         attendee.userId === userInfo?.userId &&
         attendee.role === "PENDING_ATTENDEE"
     );
+
+    // const isCanceled = event.attendees?.some(
+    //   (attendee) =>
+    //     attendee.userId === userInfo?.userId &&
+    //     attendee.status === "CANCEL"
+    // );
+
     const isAttendee = event.attendees?.some(
       (attendee) =>
         attendee.userId === userInfo?.userId &&
@@ -173,6 +192,32 @@ function Explore({ isDarkMode }: ExploreProps) {
         <Card
           hoverable
           className={`event-card ${isDarkMode ? "dark" : "light"}`}
+          onClick={() => {
+            const params = new URLSearchParams();
+            params.set("eventId", event.id);
+
+            if (currentCategory) {
+              params.set("category", currentCategory);
+            }
+
+            // Check if user is a member or admin of the event
+            const isEventMember = event.attendees?.some(
+              (attendee) =>
+                attendee.userId === userInfo?.userId &&
+                (attendee.role === "ADMIN" || attendee.role === "ATTENDEE") &&
+                attendee.status === "ENROLL"
+            );
+
+            if (isEventMember) {
+              navigate(`/event?${params.toString()}`);
+            }
+
+            if (!isEventMember && currentTab === "my-events") {
+              toast.error(
+                "You don't have permission to view this event because you're not a member or admin"
+              );
+            }
+          }}
           cover={
             event.eventAvatar && (
               <img
@@ -189,7 +234,12 @@ function Explore({ isDarkMode }: ExploreProps) {
               <Space direction="vertical">
                 <div className="event-info">
                   <Tag color="blue">{event.category}</Tag>
-                  <Tag>{event.attendeesCount} members</Tag>
+                  <Tag>
+                    <Space>
+                      <UserOutlined />
+                      {event.attendeesCount}
+                    </Space>
+                  </Tag>
                 </div>
                 <Space>
                   <CalendarOutlined />
@@ -206,23 +256,21 @@ function Explore({ isDarkMode }: ExploreProps) {
                   <Avatar src={event.creator.avatarUrl} />
                   <span className="creator-name">{event.creator.userName}</span>
                 </div>
-                <Button
-                  type="primary"
-                  onClick={() => joinEventMutation.mutate(event.id)}
-                  disabled={isCreator || hasPendingRequest || isAttendee}
-                  loading={joinEventMutation.isPending}
-                  className={`join-button ${
-                    hasPendingRequest ? "pending" : ""
-                  }`}
-                >
-                  {isCreator
-                    ? "You are the creator"
-                    : isAttendee
-                    ? "You are a member"
-                    : hasPendingRequest
-                    ? "Waiting for admin's approval"
-                    : "Join Event"}
-                </Button>
+                {!isCreator && !isAttendee && (
+                  <Button
+                    type="primary"
+                    onClick={() => joinEventMutation.mutate(event.id)}
+                    disabled={hasPendingRequest}
+                    loading={joinEventMutation.isPending}
+                    className={`join-button ${
+                      hasPendingRequest ? "pending" : ""
+                    }`}
+                  >
+                    {hasPendingRequest
+                      ? "Waiting for admin's approval"
+                      : "Join Event"}
+                  </Button>
+                )}
               </Space>
             }
           />
@@ -233,14 +281,12 @@ function Explore({ isDarkMode }: ExploreProps) {
 
   const tabItems = [
     {
-      key: "trending",
-      label: "Trending",
+      key: "my-events",
+      label: "My Events",
       children: (
-        <>
-          <Row gutter={[16, 16]}>
-            {trendingEvents.data?.data?.events.map(renderEventCard)}
-          </Row>
-        </>
+        <Row gutter={[16, 16]}>
+          {myEvents.data?.data?.events.map(renderEventCard)}
+        </Row>
       ),
     },
     {
@@ -264,9 +310,11 @@ function Explore({ isDarkMode }: ExploreProps) {
           </Select>
 
           <Row gutter={[16, 16]}>
-            {(currentCategory
+            {(currentCategory === "TRENDING"
+              ? trendingEvents.data?.data?.events
+              : currentCategory
               ? categoryEvents.data?.data?.events
-              : allEvents.data?.data?.events
+              : discoveryEvents.data?.data?.events
             )?.map(renderEventCard)}
           </Row>
         </>
@@ -276,14 +324,29 @@ function Explore({ isDarkMode }: ExploreProps) {
 
   return (
     <Layout className={`explore-layout ${isDarkMode ? "dark" : "light"}`}>
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        onClick={() => setCreateModalVisible(true)}
-        className="create-event-button"
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: 16,
+        }}
       >
-        Create Event
-      </Button>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => setCreateModalVisible(true)}
+          style={{
+            borderRadius: 8,
+            background: "#000000",
+            height: 32,
+            fontWeight: 500,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          Create Event
+        </Button>
+      </div>
 
       <Tabs
         activeKey={currentTab}
@@ -341,7 +404,7 @@ function Explore({ isDarkMode }: ExploreProps) {
 
           <Form.Item name="category" label="Category">
             <Select>
-              {Object.values(EventCategory).map((category) => (
+              {Object.values(CreateEventCategory).map((category) => (
                 <Select.Option key={category} value={category}>
                   {category}
                 </Select.Option>

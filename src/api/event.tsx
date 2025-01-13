@@ -38,24 +38,85 @@ export interface CreateEventDto {
   description: string;
   eventAvatar?: string;
   eventDate: string;
-  category?: EventCategory;
+  category?: CreateEventCategory;
   address?: string;
 }
 
-export enum EventCategory {
+export enum CreateEventCategory {
   MUSIC = "MUSIC",
   SPORTS = "SPORTS",
-  ARTS = "ARTS",
-  SCIENCE = "SCIENCE",
-  TECHNOLOGY = "TECHNOLOGY",
   EDUCATION = "EDUCATION",
+  TECHNOLOGY = "TECHNOLOGY",
   FOOD = "FOOD",
+  ART = "ART",
   BUSINESS = "BUSINESS",
   HEALTH = "HEALTH",
   OTHER = "OTHER",
 }
 
+export enum EventCategory {
+  TRENDING = "TRENDING",
+  MUSIC = "MUSIC",
+  SPORTS = "SPORTS",
+  EDUCATION = "EDUCATION",
+  TECHNOLOGY = "TECHNOLOGY",
+  FOOD = "FOOD",
+  ART = "ART",
+  BUSINESS = "BUSINESS",
+  HEALTH = "HEALTH",
+  OTHER = "OTHER",
+}
+
+interface EventAttendee {
+  userId: string;
+  role: "ADMIN" | "ATTENDEE" | "PENDING_ATTENDEE";
+  status: "ENROLL" | "CANCEL";
+  userName: string;
+  avatarUrl: string;
+}
+
+interface EventCreator {
+  id: string;
+  userName: string;
+  avatarUrl: string;
+}
+
+export interface EventDetail {
+  id: string;
+  name: string;
+  description: string;
+  eventAvatar: string | null;
+  eventDate: string;
+  category: EventCategory;
+  address: string | null;
+  createdAt: string;
+  creator: EventCreator;
+  attendees: EventAttendee[];
+  attendeesCount: number;
+  activeAttendeesCount: number;
+}
+
+interface JoinRequest {
+  id: string;
+  eventId: string;
+  userId: string;
+  role: "ADMIN" | "ATTENDEE" | "PENDING_ATTENDEE";
+  status: "ENROLL" | "CANCEL";
+  createAt: string;
+  user: {
+    id: string;
+    userName: string;
+    avatarUrl: string;
+  };
+}
+
+interface JoinRequestsResponse {
+  requests: JoinRequest[];
+  count: number;
+}
+
 export const eventApi = {
+  // User Layout
   createEvent: async (data: FormData) =>
     axiosClient.post("/events", data, {
       headers: {
@@ -63,11 +124,10 @@ export const eventApi = {
       },
     }),
 
-  getAllEvents: (page: number = 1, limit: number = 10) =>
-    axiosClient.get<EventResponse>(`/events?page=${page}&limit=${limit}`),
-
   getTrendingEvents: () =>
     axiosClient.get<{ events: Event[] }>("/events/trending/top"),
+
+  joinEvent: (id: string) => axiosClient.post(`/events/${id}/join`),
 
   getEventsByCategory: (
     category: EventCategory,
@@ -78,26 +138,34 @@ export const eventApi = {
       `/events/category/${category}?page=${page}&limit=${limit}`
     ),
 
-  getEventById: (id: string) => axiosClient.get<Event>(`/events/${id}`),
+  getDiscoveryEvents: (page: number = 1, limit: number = 10) =>
+    axiosClient.get<EventResponse>(
+      `/events/all/discover?page=${page}&limit=${limit}`
+    ),
+
+  getMyEvents: (page: number = 1, limit: number = 10) =>
+    axiosClient.get<EventResponse>(
+      `/events/all/my-events?page=${page}&limit=${limit}`
+    ),
+
+  getEventById: (id: string) => axiosClient.get<EventDetail>(`/events/${id}`),
+
+  cancelAttendance: (id: string, cancelledUserId: string | undefined) =>
+    axiosClient.post(`/events/${id}/cancel/${cancelledUserId}`),
+
+  // Admin Layout
+  getAllEvents: (page: number = 1, limit: number = 10) =>
+    axiosClient.get<EventResponse>(`/events?page=${page}&limit=${limit}`),
 
   getEventAttendees: (id: string) => axiosClient.get(`/events/${id}/attendees`),
-
-  getEventRequests: (id: string) => axiosClient.get(`/events/${id}/requests`),
+  getJoinRequests: (id: string) =>
+    axiosClient.get<JoinRequestsResponse>(`/events/${id}/requests`),
 
   updateEvent: (id: string, data: Partial<CreateEventDto>) =>
     axiosClient.patch(`/events/${id}`, data),
 
-  joinEvent: (id: string) => axiosClient.post(`/events/${id}/join`),
-
   approveRequest: (eventId: string, userId: string) =>
     axiosClient.post(`/events/${eventId}/approve/${userId}`),
 
-  cancelAttendance: (id: string) => axiosClient.post(`/events/${id}/cancel`),
-
   deleteEvent: (id: string) => axiosClient.delete(`/events/${id}`),
-
-  getDiscoveryEvents: (page: number = 1, limit: number = 10) =>
-    axiosClient.get<EventResponse>(
-      `/events/discover/all?page=${page}&limit=${limit}`
-    ),
 };

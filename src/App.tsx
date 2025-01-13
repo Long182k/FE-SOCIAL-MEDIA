@@ -12,6 +12,7 @@ import LoginPage from "./routes/Login";
 import Messages from "./routes/Messages";
 import Notifications from "./routes/Notifications";
 import Settings from "./routes/Settings";
+import EventDetail from "./routes/Explore/EventDetail";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -79,6 +80,10 @@ function App() {
               <Route
                 path="groups/*"
                 element={<Groups isDarkMode={isDarkMode} />}
+              />
+              <Route
+                path="/event/*"
+                element={<EventDetail isDarkMode={isDarkMode} />}
               />
               <Route
                 path="bookmarks"

@@ -6,10 +6,8 @@ import { useLocation } from "react-router-dom";
 
 function MenuItems({ isDarkMode }: MenuItemsProps): JSX.Element {
   const location = useLocation();
-  console.log("🚀  location:", location)
   // Get the current path without the leading slash
   const currentPath = location.pathname.substring(1) || "home";
-  console.log("🚀  currentPath:", currentPath)
 
   return (
     <Menu
