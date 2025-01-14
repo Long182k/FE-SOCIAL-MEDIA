@@ -9,10 +9,10 @@ import Explore from "./routes/Explore";
 import Groups from "./routes/Groups";
 import HomePage from "./routes/Home";
 import LoginPage from "./routes/Login";
-import Marketplace from "./routes/Marketplace";
 import Messages from "./routes/Messages";
 import Notifications from "./routes/Notifications";
 import Settings from "./routes/Settings";
+import EventDetail from "./routes/Explore/EventDetail";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -74,12 +74,8 @@ function App() {
                 }
               />
               <Route
-                path="explore"
+                path="explore/*"
                 element={<Explore isDarkMode={isDarkMode} />}
-              />
-              <Route
-                path="marketplace"
-                element={<Marketplace isDarkMode={isDarkMode} />}
               />
               <Route
                 path="groups/*"
