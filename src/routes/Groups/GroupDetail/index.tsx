@@ -148,7 +148,12 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
                 {groupName}
               </Title>
               <Space size={4} className="member-info">
-                <Text type="secondary">
+                <Text
+                  type="secondary"
+                  style={{
+                    color: isDarkMode ? "#ffffff" : undefined,
+                  }}
+                >
                   {group?._count?.members.toLocaleString()} members
                 </Text>
                 <Text type="secondary">•</Text>
