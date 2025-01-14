@@ -148,7 +148,10 @@ export const eventApi = {
       `/events/all/my-events?page=${page}&limit=${limit}`
     ),
 
-  getEventById: (id: string) => axiosClient.get<EventDetail>(`/events/${id}`),
+  getEventById: (id: string) => {
+    console.log("id", id);
+    return axiosClient.get<EventDetail>(`/events/${id}`);
+  },
 
   cancelAttendance: (id: string, cancelledUserId: string | undefined) =>
     axiosClient.post(`/events/${id}/cancel/${cancelledUserId}`),

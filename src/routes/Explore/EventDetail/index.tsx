@@ -16,6 +16,7 @@ import {
   Typography,
   message,
   Tag,
+  Skeleton,
 } from "antd";
 import dayjs from "dayjs";
 import { useState } from "react";
@@ -39,14 +40,18 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
   const { userInfo } = useAppStore();
 
   const eventId = searchParams.get("eventId");
+
   const fromTab = searchParams.get("from") || "my-events";
   const category = searchParams.get("category");
 
-  const { data: event } = useQuery({
+  const { data: event, isLoading } = useQuery({
     queryKey: ["event", eventId],
     queryFn: () => eventApi.getEventById(eventId!),
     select: (data) => data.data,
     enabled: !!eventId,
+    retry: false,
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   const { data: requests } = useQuery({
@@ -80,8 +85,54 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
     },
   });
 
-  if (!eventId || !event) {
+  if (!eventId) {
     return <Navigate to="/explore" replace />;
+  }
+
+  if (isLoading) {
+    return (
+      <Layout
+        style={{
+          background: isDarkMode ? "#141414" : "#ffffff",
+          minHeight: "100vh",
+          width: "100%",
+        }}
+      >
+        <div className="event-detail-container">
+          <div className="event-cover-container">
+            <Skeleton.Image
+              active
+              style={{
+                height: "350px",
+                borderRadius: 0,
+              }}
+            />
+          </div>
+
+          <div
+            className="event-info-section"
+            style={{
+              borderBottom: `1px solid ${isDarkMode ? "#303030" : "#f0f0f0"}`,
+              padding: "24px",
+            }}
+          >
+            <div style={{ marginBottom: "24px" }}>
+              <Skeleton.Button
+                active
+                size="large"
+                style={{ marginBottom: "16px", width: 200 }}
+              />
+              <Skeleton active paragraph={{ rows: 2 }} />
+            </div>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <Skeleton.Avatar active size="default" />
+              <Skeleton.Avatar active size="default" />
+              <Skeleton.Avatar active size="default" />
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
   const isAdmin = event?.attendees?.some(
@@ -114,8 +165,8 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
         <div className="event-cover-container">
           <img
             className="event-cover-image"
-            src={event.eventAvatar || "https://via.placeholder.com/1200x350"}
-            alt={event.name}
+            src={event?.eventAvatar || "https://via.placeholder.com/1200x350"}
+            alt={event?.name}
           />
         </div>
 
@@ -135,7 +186,7 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
                 if (category) {
                   params.set("category", category);
                 }
-                navigate(`/explore?${params.toString()}`);
+                navigate(`/explore`);
               }}
               shape="circle"
               style={{
@@ -150,32 +201,33 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
                 className="event-title"
                 style={{ color: isDarkMode ? "#ffffff" : "#000000" }}
               >
-                {event.name}
+                {event?.name}
               </Title>
               <Space size={4} className="member-info">
                 <Tag>
                   <Space>
                     <UserOutlined />
-                    {event.attendeesCount}
+                    {event?.attendeesCount}
                   </Space>
                 </Tag>
                 <div
                   className="member-avatars"
                   onClick={() => setMembersModalVisible(true)}
                 >
-                  {activeMembers?.slice(0, 3).map((member) => (
-                    <Avatar
-                      key={member.userId}
-                      src={member.avatarUrl}
-                      className="member-avatar"
-                      style={{
-                        border: `2px solid ${
-                          isDarkMode ? "#141414" : "#ffffff"
-                        }`,
-                      }}
-                    />
-                  ))}
-                  {activeMembers?.length > 3 && (
+                  {activeMembers &&
+                    activeMembers?.slice(0, 3).map((member) => (
+                      <Avatar
+                        key={member.userId}
+                        src={member.avatarUrl}
+                        className="member-avatar"
+                        style={{
+                          border: `2px solid ${
+                            isDarkMode ? "#141414" : "#ffffff"
+                          }`,
+                        }}
+                      />
+                    ))}
+                  {activeMembers && activeMembers?.length > 3 && (
                     <Avatar
                       className="more-members"
                       style={{
@@ -183,7 +235,7 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
                         color: isDarkMode ? "#ffffff" : "#000000",
                       }}
                     >
-                      +{activeMembers.length - 3}
+                      +{activeMembers?.length - 3}
                     </Avatar>
                   )}
                 </div>
@@ -191,15 +243,15 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
               <Space direction="vertical" size={8} className="event-details">
                 <Space>
                   <CalendarOutlined />
-                  {dayjs(event.eventDate).format("MMM D, YYYY h:mm A")}
+                  {dayjs(event?.eventDate).format("MMM D, YYYY h:mm A")}
                 </Space>
-                {event.address && (
+                {event?.address && (
                   <Space>
                     <EnvironmentOutlined />
-                    {event.address}
+                    {event?.address}
                   </Space>
                 )}
-                <Tag color="blue">{event.category}</Tag>
+                <Tag color="blue">{event?.category}</Tag>
               </Space>
             </div>
           </div>
@@ -240,7 +292,7 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
             Description
           </Title>
           <Text style={{ color: isDarkMode ? "#ffffff" : "#000000" }}>
-            {event.description}
+            {event?.description}
           </Text>
         </div>
       </div>

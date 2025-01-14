@@ -4,7 +4,15 @@ import {
   ArrowLeftOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Button, Layout, List, Space, Typography } from "antd";
+import {
+  Avatar,
+  Button,
+  Layout,
+  List,
+  Space,
+  Typography,
+  Skeleton,
+} from "antd";
 import {
   Navigate,
   useLocation,
@@ -34,14 +42,68 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
     enabled: !!groupId,
   });
 
-  const { data: groupDetails } = useQuery({
-    queryKey: ["groupDetails", groupId],
+  const { data: group, isLoading } = useQuery({
+    queryKey: ["group", groupId],
     queryFn: () => groupApi.getGroupById(groupId!),
     enabled: !!groupId,
   });
 
-  if (!groupId || !groupName) {
+  if (!groupId) {
     return <Navigate to="/groups" replace />;
+  }
+
+  if (isLoading) {
+    return (
+      <Layout
+        style={{
+          background: isDarkMode ? "#141414" : "#ffffff",
+          minHeight: "100vh",
+          width: "100%",
+        }}
+      >
+        <div className="group-detail-container">
+          <div className="group-cover-container">
+            <Skeleton.Image
+              active
+              style={{
+                height: "350px",
+                borderRadius: 0,
+              }}
+            />
+          </div>
+
+          <div
+            className="group-info-section"
+            style={{
+              borderBottom: `1px solid ${isDarkMode ? "#303030" : "#f0f0f0"}`,
+              padding: "24px",
+            }}
+          >
+            <div style={{ marginBottom: "24px" }}>
+              <Skeleton.Button
+                active
+                size="large"
+                style={{ marginBottom: "16px", width: 200 }}
+              />
+              <Skeleton active paragraph={{ rows: 2 }} />
+            </div>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <Skeleton.Avatar active size="default" />
+              <Skeleton.Avatar active size="default" />
+              <Skeleton.Avatar active size="default" />
+            </div>
+          </div>
+
+          <div style={{ padding: "24px" }}>
+            <Skeleton.Button
+              active
+              style={{ marginBottom: "16px", width: 120 }}
+            />
+            <Skeleton active paragraph={{ rows: 3 }} />
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
   return (
@@ -54,10 +116,7 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
         <div className="group-cover-container">
           <img
             className="group-cover-image"
-            src={
-              groupDetails?.groupAvatar ||
-              "https://via.placeholder.com/1200x350"
-            }
+            src={group?.groupAvatar || "https://via.placeholder.com/1200x350"}
             alt={groupName}
           />
         </div>
@@ -90,24 +149,22 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
               </Title>
               <Space size={4} className="member-info">
                 <Text type="secondary">
-                  {groupDetails?._count?.members.toLocaleString()} members
+                  {group?._count?.members.toLocaleString()} members
                 </Text>
                 <Text type="secondary">•</Text>
                 <div className="member-avatars">
-                  {groupDetails?.members
-                    ?.slice(0, 5)
-                    .map((member: any, index: any) => (
-                      <Avatar
-                        key={member.user.id}
-                        src={member.user.avatarUrl}
-                        className="member-avatar"
-                        style={{
-                          border: `2px solid ${
-                            isDarkMode ? "#141414" : "#ffffff"
-                          }`,
-                        }}
-                      />
-                    ))}
+                  {group?.members?.slice(0, 5).map((member: any) => (
+                    <Avatar
+                      key={member.user.id}
+                      src={member.user.avatarUrl}
+                      className="member-avatar"
+                      style={{
+                        border: `2px solid ${
+                          isDarkMode ? "#141414" : "#ffffff"
+                        }`,
+                      }}
+                    />
+                  ))}
                 </div>
               </Space>
             </div>
