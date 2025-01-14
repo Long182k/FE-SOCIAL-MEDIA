@@ -26,16 +26,17 @@ const SettingsPage = ({ isDarkMode, handleThemeChange }: SettingsPageProps) => {
 
   const cardStyle = {
     marginBottom: 16,
-    backgroundColor: token.colorBgContainer,
+    marginTop: 12,
+    backgroundColor: isDarkMode ? "#1A1A1A" : "white",
     borderRadius: token.borderRadiusLG,
     border: isDarkMode ? "none" : "1px solid #f0f0f0",
+    color: isDarkMode ? "white" : "black",
   };
 
   const contentStyle = {
-    maxWidth: 800,
-    margin: "24px auto",
-    padding: "0 16px",
-    backgroundColor: isDarkMode ? token.colorBgLayout : "#f5f5f5",
+    padding: "4px 16px",
+    backgroundColor: isDarkMode ? "black" : "#f5f5f5",
+    color: isDarkMode ? "white" : "black",
   };
 
   return (
@@ -43,10 +44,21 @@ const SettingsPage = ({ isDarkMode, handleThemeChange }: SettingsPageProps) => {
       <Content style={contentStyle}>
         <Card style={cardStyle}>
           <Space direction="vertical" size="small">
-            <Title level={5} style={{ margin: 0 }}>
+            <Title
+              level={5}
+              style={{
+                margin: 0,
+                color: isDarkMode ? "#ffffff" : undefined,
+              }}
+            >
               Appearance
             </Title>
-            <Text type="secondary">
+            <Text
+              type="secondary"
+              style={{
+                color: isDarkMode ? "rgba(255, 255, 255, 0.65)" : undefined,
+              }}
+            >
               Customize the appearance of the app. Automatically switch between
               day and night themes.
             </Text>
@@ -62,10 +74,21 @@ const SettingsPage = ({ isDarkMode, handleThemeChange }: SettingsPageProps) => {
 
         <Card style={cardStyle}>
           <Space direction="vertical" size="small">
-            <Title level={5} style={{ margin: 0 }}>
+            <Title
+              level={5}
+              style={{
+                margin: 0,
+                color: isDarkMode ? "#ffffff" : undefined,
+              }}
+            >
               Account
             </Title>
-            <Text type="secondary">
+            <Text
+              type="secondary"
+              style={{
+                color: isDarkMode ? "rgba(255, 255, 255, 0.65)" : undefined,
+              }}
+            >
               Manage your account settings and preferences.
             </Text>
             <Button

@@ -110,7 +110,7 @@ const CreatePostForm = ({
       className={`create-post-card ${isDarkMode ? "dark" : "light"}`}
       style={{
         borderRadius: "8px",
-        padding: "16px",
+        // padding: "16px",
         backgroundColor: isDarkMode ? "#242526" : "#ffffff",
       }}
     >
@@ -215,18 +215,20 @@ const CreatePostForm = ({
               </Popover>
             </Space>
 
-            <Button
-              type="primary"
-              onClick={handleSubmit}
-              loading={uploading}
-              style={{
-                backgroundColor: isDarkMode ? "#505151" : "#1b1b1b",
-                borderRadius: "6px",
-                border: "none",
-              }}
-            >
-              Create post
-            </Button>
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <Button
+                type="primary"
+                onClick={handleSubmit}
+                loading={uploading}
+                style={{
+                  backgroundColor: isDarkMode ? "#505151" : "#1b1b1b",
+                  borderRadius: "8px",
+                  border: "none",
+                }}
+              >
+                Create post
+              </Button>
+            </div>
           </Space>
         </div>
       </Space>

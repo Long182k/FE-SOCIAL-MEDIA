@@ -86,9 +86,17 @@ const CenterContent = ({
   };
 
   return (
-    <Content style={{ padding: "0 24px" }}>
+    <Content>
       <StoryList isDarkMode={isDarkMode} />
-      <Card style={{ marginBottom: 16 }}>
+      <Card
+        style={{
+          marginBottom: 16,
+          marginLeft: 16,
+          marginRight: 16,
+          borderRadius: 8,
+          backgroundColor: isDarkMode ? "#242526" : "white",
+        }}
+      >
         <CreatePostForm
           onSubmit={handleCreatePost}
           isDarkMode={isDarkMode}

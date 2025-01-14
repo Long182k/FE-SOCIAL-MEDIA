@@ -7,6 +7,7 @@
 }
 
 .create-post-card.light .ant-btn-text {
+  background-color: #f2f2f2;
   color: rgba(0, 0, 0, 0.7);
   padding: 8px 12px;
 }
