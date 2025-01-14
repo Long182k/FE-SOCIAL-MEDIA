@@ -113,6 +113,8 @@ const PostItem = ({
         backgroundColor: isDarkMode ? "#242526" : "#ffffff",
         border: isDarkMode ? "1px solid #3e4042" : "1px solid #e4e6eb",
         marginBottom: "16px",
+        marginLeft: "16px",
+        marginRight: "16px",
         borderRadius: "8px",
       }}
     >
@@ -227,10 +229,18 @@ const PostItem = ({
               type="text"
               icon={
                 <LikeOutlined
-                  style={{ color: isLiked ? "#1677ff" : undefined }}
+                  style={{
+                    color: isLiked
+                      ? "#1677ff"
+                      : isDarkMode
+                      ? "#b0b3b8"
+                      : undefined,
+                    fontSize: "20px",
+                    transition: "all 0.3s ease",
+                  }}
                 />
               }
-              className={isDarkMode ? "dark" : ""}
+              className={`action-button ${isDarkMode ? "dark" : ""}`}
               onClick={() => handleLikePost?.(post.id)}
               loading={isLoadingPosts}
             >
@@ -240,8 +250,16 @@ const PostItem = ({
             </Button>
             <Button
               type="text"
-              icon={<CommentOutlined />}
-              className={isDarkMode ? "dark" : ""}
+              icon={
+                <CommentOutlined
+                  style={{
+                    color: isDarkMode ? "#b0b3b8" : undefined,
+                    fontSize: "20px",
+                    transition: "all 0.3s ease",
+                  }}
+                />
+              }
+              className={`action-button ${isDarkMode ? "dark" : ""}`}
               onClick={() => setCommentModalVisible(!commentModalVisible)}
             >
               <span style={{ color: isDarkMode ? "#b0b3b8" : "inherit" }}>
@@ -252,10 +270,18 @@ const PostItem = ({
               type="text"
               icon={
                 <SaveOutlined
-                  style={{ color: isBookmarked ? "#1677ff" : undefined }}
+                  style={{
+                    color: isBookmarked
+                      ? "#1677ff"
+                      : isDarkMode
+                      ? "#b0b3b8"
+                      : undefined,
+                    fontSize: "20px",
+                    transition: "all 0.3s ease",
+                  }}
                 />
               }
-              className={isDarkMode ? "dark" : ""}
+              className={`action-button ${isDarkMode ? "dark" : ""}`}
               onClick={() => handleBookmarkPost?.(post.id)}
               loading={isLoadingPosts}
             >

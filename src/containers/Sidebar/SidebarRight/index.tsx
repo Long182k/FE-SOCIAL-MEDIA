@@ -28,15 +28,7 @@ function SiderRight({ isDarkMode }: SiderRightProps): JSX.Element {
         ...getBackgroundColor(isDarkMode),
       }}
     >
-      <Card
-        title={<span style={getTextColor(isDarkMode)}>You might like</span>}
-        extra={
-          <a href="#" style={{ color: isDarkMode ? "#1677ff" : "#1677ff" }}>
-            See all
-          </a>
-        }
-        style={getBackgroundColor(isDarkMode)}
-      >
+      <Card style={getBackgroundColor(isDarkMode)}>
         <List.Item>
           <div style={{ display: "flex", alignItems: "center" }}>
             <Avatar
