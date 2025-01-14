@@ -39,7 +39,6 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
     queryFn: () => groupApi.getGroupById(groupId!),
     enabled: !!groupId,
   });
-  console.log("🚀  groupDetails:", groupDetails)
 
   if (!groupId || !groupName) {
     return <Navigate to="/groups" replace />;

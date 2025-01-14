@@ -58,10 +58,15 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
   const cancelAttendanceMutation = useMutation({
     mutationFn: (cancelledUserId: string | undefined) =>
       eventApi.cancelAttendance(eventId!, cancelledUserId),
-    onSuccess: () => {
-      message.success("Successfully left the event");
+    onSuccess: (cancelledUserId) => {
       queryClient.invalidateQueries({ queryKey: ["event", eventId] });
       setRequestsModalVisible(false);
+
+      if (cancelledUserId) {
+        message.success("Cancel join request successfully");
+      } else {
+        message.success("Left the event successfully");
+      }
     },
   });
 

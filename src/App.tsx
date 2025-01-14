@@ -74,16 +74,12 @@ function App() {
                 }
               />
               <Route
-                path="explore"
+                path="explore/*"
                 element={<Explore isDarkMode={isDarkMode} />}
               />
               <Route
                 path="groups/*"
                 element={<Groups isDarkMode={isDarkMode} />}
-              />
-              <Route
-                path="/event/*"
-                element={<EventDetail isDarkMode={isDarkMode} />}
               />
               <Route
                 path="bookmarks"

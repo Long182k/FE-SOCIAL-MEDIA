@@ -116,7 +116,6 @@
   background: #ffffff;
 }
 
-/* Override default antd blue color */
 .groups-tab-container .ant-tabs-nav .ant-tabs-tab-active {
   border-color: transparent;
 }
@@ -130,4 +129,8 @@
 .groups-tab-container .ant-tabs-tab-remove:active,
 .groups-tab-container .ant-tabs-tab-remove:focus {
   color: inherit;
+}
+
+.category-select.dark .ant-select-selection-placeholder {
+  color: rgba(255, 255, 255, 0.85);
 }
