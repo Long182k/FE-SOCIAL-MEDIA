@@ -22,15 +22,16 @@ import { User } from "../../@util/types/auth.type";
 import { convertToHumanTime } from "../../@util/helpers";
 import { ChatRoom } from "../../@util/interface/chat.interface";
 import { useAppStore } from "../../store";
-import "./Chat.css"; // Custom CSS for chat bubble styles
+import "./chat.css"; // Custom CSS for chat bubble styles
 
 const { Text } = Typography;
 
 type MessageProps = {
   currentUserId: string;
+  isDarkMode: boolean;
 };
 
-const MessageApp = ({ currentUserId }: MessageProps) => {
+const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
   const { Title } = Typography;
 
   const {
@@ -173,7 +174,7 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
   };
 
   return (
-    <Layout style={{ height: "20vh", background: "#1E1F22" }}>
+    <Layout style={{ background: "#1E1F22" }}>
       <Layout.Sider width={250} style={{ background: "#2B2D31" }}>
         <div style={{ padding: "20px" }}>
           <div style={{ marginBottom: "20px" }}>
