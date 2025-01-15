@@ -16,6 +16,7 @@ export interface Comment {
   createdAt: Date;
   userId: string;
   postId: string;
+  sentiment: string;
   user: User;
 }
 
@@ -39,6 +40,7 @@ export interface Post {
   id: string;
   content: string;
   userId: string;
+  sentiment: string;
   createdAt: Date;
   user: User;
   attachments: Media[];

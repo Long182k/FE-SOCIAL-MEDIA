@@ -3,6 +3,7 @@ import {
   EditOutlined,
   ShareAltOutlined,
   CheckOutlined,
+  HeartOutlined,
 } from "@ant-design/icons";
 import { Button, DatePicker, Form, Input, Modal, Upload } from "antd";
 import moment from "moment";
@@ -47,6 +48,7 @@ const ProfileScreen = ({ isDarkMode }: ProfileScreenProps) => {
   const [isCopied, setIsCopied] = useState(false);
 
   const userId = searchParams.get("userId") || userInfo?.userId || userInfo?.id;
+
   const { data: userDetail } = useQuery({
     queryKey: ["user", userId],
     queryFn: () => getUserById(userId),
@@ -248,18 +250,33 @@ const ProfileScreen = ({ isDarkMode }: ProfileScreenProps) => {
           <div className="profile-header">
             <h2>{userDetail?.userName}</h2>
             <div className="profile-actions">
-              <Button
-                icon={<EditOutlined />}
-                onClick={() => setIsEditing(true)}
-                style={{
-                  backgroundColor: "#f0f2f5",
-                  border: "none",
-                  color: "#65676b",
-                  marginRight: "8px",
-                }}
-              >
-                Edit Profile
-              </Button>
+              {userInfo?.id === userDetail?.id ? (
+                <Button
+                  icon={<EditOutlined />}
+                  onClick={() => setIsEditing(true)}
+                  style={{
+                    backgroundColor: "#f0f2f5",
+                    border: "none",
+                    color: "#65676b",
+                    marginRight: "8px",
+                  }}
+                >
+                  Edit Profile
+                </Button>
+              ) : (
+                <Button
+                  icon={<HeartOutlined />}
+                  // onClick={() => setIsEditing(true)}
+                  style={{
+                    backgroundColor: "#f0f2f5",
+                    border: "none",
+                    color: "#65676b",
+                    marginRight: "8px",
+                  }}
+                >
+                  Follow
+                </Button>
+              )}
               <Button
                 icon={isCopied ? <CheckOutlined /> : <ShareAltOutlined />}
                 onClick={handleShare}
