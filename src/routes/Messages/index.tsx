@@ -174,8 +174,22 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
   };
 
   return (
-    <Layout style={{ background: "white", height: "-webkit-fill-available" }}>
-      <Layout.Sider width={250} style={{ background: "#2B2D31" }}>
+    <Layout
+      style={{
+        background: isDarkMode ? "#1E1F22" : "#ffffff",
+        height: "100%",
+        overflow: "hidden",
+      }}
+    >
+      <Layout.Sider
+        width={250}
+        style={{
+          background: isDarkMode ? "#2B2D31" : "#f0f2f5",
+          height: "100%",
+          overflowY: "auto",
+          borderRight: `1px solid ${isDarkMode ? "#3F4147" : "#e4e6eb"}`,
+        }}
+      >
         <div style={{ padding: "20px" }}>
           <div style={{ marginBottom: "20px" }}>
             <div
@@ -185,48 +199,55 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
                 alignItems: "center",
               }}
             >
-              <Title level={5} style={{ color: "#96989D", margin: 0 }}>
+              <Title
+                level={5}
+                style={{
+                  color: isDarkMode ? "#96989D" : "#65676b",
+                  margin: 0,
+                }}
+              >
                 DIRECT MESSAGES
               </Title>
               <Button
                 type="text"
-                icon={<PlusOutlined style={{ color: "#96989D" }} />}
+                icon={
+                  <PlusOutlined
+                    style={{
+                      color: isDarkMode ? "#96989D" : "#65676b",
+                    }}
+                  />
+                }
                 onClick={() => showModal("DIRECT", "hi")}
               />
             </div>
-            {isLoadingChatRooms ? (
-              <div style={{ color: "#fff" }}>Loading DIRECT messages...</div>
-            ) : (
-              <List
-                dataSource={
-                  (chatRoomsQuery as ChatRoom[])?.filter(
-                    (room) => room.type === "DIRECT"
-                  ) || []
-                }
-                renderItem={(room) => (
-                  <List.Item
-                    key={room.id}
-                    onClick={() => {
-                      handleSelectChatRoom(room);
-                    }}
-                    style={{
-                      padding: "8px",
-                      cursor: "pointer",
-                      color: "#96989D",
-                      borderRadius: "4px",
-                      background:
-                        selectedChatRoom?.id === room.id
+
+            <List
+              dataSource={chatRoomsQuery?.filter(
+                (room) => room.type === "DIRECT"
+              )}
+              renderItem={(room) => (
+                <List.Item
+                  key={room.id}
+                  onClick={() => handleSelectChatRoom(room)}
+                  style={{
+                    padding: "8px",
+                    cursor: "pointer",
+                    color: isDarkMode ? "#96989D" : "#65676b",
+                    borderRadius: "4px",
+                    background:
+                      selectedChatRoom?.id === room.id
+                        ? isDarkMode
                           ? "#393C43"
-                          : "transparent",
-                    }}
-                  >
-                    {room.participants?.find(
-                      (participant) => participant.userId !== currentUserId
-                    )?.user?.userName || "Unknown User"}
-                  </List.Item>
-                )}
-              />
-            )}
+                          : "#e3e5e8"
+                        : "transparent",
+                  }}
+                >
+                  {room.participants?.find(
+                    (participant) => participant.userId !== currentUserId
+                  )?.user?.userName || "Unknown User"}
+                </List.Item>
+              )}
+            />
           </div>
 
           <div>
@@ -279,14 +300,27 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
         </div>
       </Layout.Sider>
 
-      <Layout.Content style={{ background: "#313338" }}>
+      <Layout.Content
+        style={{
+          background: isDarkMode ? "#313338" : "#ffffff",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         {selectedChatRoom && (
-          <div
-            style={{ height: "100%", display: "flex", flexDirection: "column" }}
-          >
-            <div style={{ flex: 1, padding: "20px", overflowY: "auto" }}>
+          <>
+            <div
+              style={{
+                flex: 1,
+                overflowY: "auto",
+                padding: "20px",
+              }}
+            >
               {isMessagesLoading ? (
-                <div style={{ color: "#fff" }}>Loading messages...</div>
+                <div style={{ color: isDarkMode ? "#fff" : "#000" }}>
+                  Loading messages...
+                </div>
               ) : (
                 <div className="chat-container">
                   {messages?.map((message) => (
@@ -303,10 +337,38 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
                           className="avatar"
                         />
                       )}
-                      <div className="bubble">
-                        <Text className="author">{message.user?.userName}</Text>
+                      <div
+                        className="bubble"
+                        style={{
+                          backgroundColor: isDarkMode
+                            ? message.senderId === currentUserId
+                              ? "#6272a4"
+                              : "#44475a"
+                            : message.senderId === currentUserId
+                            ? "#0084ff"
+                            : "#f0f2f5",
+                          color: isDarkMode
+                            ? "#ffffff"
+                            : message.senderId === currentUserId
+                            ? "#ffffff"
+                            : "#000000",
+                        }}
+                      >
+                        <Text
+                          className="author"
+                          style={{
+                            color: isDarkMode ? "#ffffff" : "#000000",
+                          }}
+                        >
+                          {message.user?.userName}
+                        </Text>
                         <p className="content">{message.content}</p>
-                        <Text className="timestamp">
+                        <Text
+                          className="timestamp"
+                          style={{
+                            color: isDarkMode ? "#b0b0b0" : "#65676b",
+                          }}
+                        >
                           {convertToHumanTime(message?.createdAt ?? "")}
                         </Text>
                       </div>
@@ -322,40 +384,47 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
               )}
             </div>
 
-            <div style={{ padding: "20px", borderTop: "1px solid #3F4147" }}>
+            <div
+              style={{
+                padding: "20px",
+                borderTop: `1px solid ${isDarkMode ? "#3F4147" : "#e4e6eb"}`,
+                background: isDarkMode ? "#313338" : "#ffffff",
+              }}
+            >
               <Space.Compact style={{ display: "flex", alignItems: "center" }}>
-                {/* Attachment Button */}
                 <Button
                   type="text"
-                  icon={<PaperClipOutlined style={{ color: "#B5BAC1" }} />}
+                  icon={
+                    <PaperClipOutlined
+                      style={{
+                        color: isDarkMode ? "#B5BAC1" : "#65676b",
+                      }}
+                    />
+                  }
                   style={{ marginRight: "8px" }}
                 />
-
-                {/* Input Field */}
                 <Input
                   placeholder="Enter message"
                   style={{
                     flex: 1,
-                    background: "#383A40",
+                    background: isDarkMode ? "#383A40" : "#f0f2f5",
                     border: "none",
-                    color: "#fff",
+                    color: isDarkMode ? "#fff" : "#000",
                   }}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  onKeyDown={handleKeyDown} // Detect Enter key press
+                  onKeyDown={handleKeyDown}
                 />
-
-                {/* Send Button */}
                 <Button
                   type="primary"
                   icon={<SendOutlined />}
-                  onClick={handleSendMessage} // Trigger send on button click
-                  loading={sendMessageMutation.isPending} // Show loading state
+                  onClick={handleSendMessage}
+                  loading={sendMessageMutation.isPending}
                   style={{ marginLeft: "8px" }}
                 />
               </Space.Compact>
             </div>
-          </div>
+          </>
         )}
       </Layout.Content>
 
