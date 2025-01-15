@@ -19,7 +19,7 @@ const LoginForm = ({ onSwitchMode }: LoginFormProp) => {
 
   const LoginFinish = async (values: LoginParams) => {
     const userData = {
-      username: values.username,
+      username: values.email,
       password: values.password,
     };
 
@@ -67,13 +67,11 @@ const LoginForm = ({ onSwitchMode }: LoginFormProp) => {
 
           <Form layout="vertical" onFinish={LoginFinish} requiredMark={false}>
             <Form.Item
-              label="User Name"
-              name="username"
-              rules={[
-                { required: true, message: "Please enter your User Name!" },
-              ]}
+              label="Email"
+              name="email"
+              rules={[{ required: true, message: "Please enter your email!" }]}
             >
-              <Input placeholder="Enter your user name" />
+              <Input placeholder="Enter your email" />
             </Form.Item>
 
             <Form.Item

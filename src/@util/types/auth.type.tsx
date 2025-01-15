@@ -5,7 +5,8 @@ export type RegisterNewUserParams = {
 };
 
 export type LoginParams = {
-  username: string;
+  username?: string;
+  email?: string;
   password: string;
 };
 
@@ -21,9 +22,11 @@ export type User = {
   hashedPassword: string;
   hashedRefreshToken: string;
   avatarUrl: string | null;
+  coverPageUrl: string | null;
   bio: string | null;
   isActive: boolean;
   createdAt: string;
+  dateOfBirth: string | null;
   accessToken?: string;
   refreshToken?: string;
 };

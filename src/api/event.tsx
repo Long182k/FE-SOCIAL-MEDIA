@@ -149,7 +149,6 @@ export const eventApi = {
     ),
 
   getEventById: (id: string) => {
-    console.log("id", id);
     return axiosClient.get<EventDetail>(`/events/${id}`);
   },
 

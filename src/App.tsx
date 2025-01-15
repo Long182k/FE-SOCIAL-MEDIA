@@ -12,11 +12,11 @@ import LoginPage from "./routes/Login";
 import Messages from "./routes/Messages";
 import Notifications from "./routes/Notifications";
 import Settings from "./routes/Settings";
-import EventDetail from "./routes/Explore/EventDetail";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import { useAppStore } from "./store";
+import Profile from "./routes/Profile";
 
 const queryClient = new QueryClient();
 
@@ -98,6 +98,10 @@ function App() {
               <Route
                 path="notifications"
                 element={<Notifications isDarkMode={isDarkMode} />}
+              />
+              <Route
+                path="profile"
+                element={<Profile isDarkMode={isDarkMode} />}
               />
               <Route
                 path="settings"
