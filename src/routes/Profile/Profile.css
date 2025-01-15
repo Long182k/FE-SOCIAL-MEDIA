@@ -224,8 +224,18 @@
   border-color: #3e4042;
 }
 
-.profile-form.dark .ant-picker-input > input {
-  color: #e4e6eb;
+/* DatePicker placeholder in dark mode */
+.dark-date-picker input::placeholder {
+  color: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Selected date text color in dark mode */
+.dark-date-picker input {
+  color: #e4e6eb !important;
+}
+
+.profile-form.dark .ant-picker-suffix {
+  color: rgba(255, 255, 255, 0.25);
 }
 
 .profile-form.dark .ant-picker:hover {
@@ -240,6 +250,17 @@
 /* Dark mode form label */
 .profile-form.dark .ant-form-item-label > label {
   color: #e4e6eb;
+}
+
+/* Dark mode placeholder styles */
+.profile-form.dark .ant-input::placeholder,
+.profile-form.dark .ant-input-textarea textarea::placeholder {
+  color: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Dark mode DatePicker placeholder */
+.profile-form.dark .ant-picker-input > input:placeholder-shown {
+  color: rgba(255, 255, 255, 0.25);
 }
 
 /* Dark mode modal specific styles */
@@ -366,4 +387,18 @@
 /* Required mark styling */
 .profile-form .ant-form-item-required::before {
   margin-right: 2px;
+}
+
+[data-theme="dark"] .ant-input::placeholder,
+[data-theme="dark"] .ant-picker-input > input::placeholder,
+[data-theme="dark"] .ant-input-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.25) !important;
+}
+
+[data-theme="dark"] .ant-picker-input > input {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+[data-theme="dark"] .ant-picker-input > input[value] {
+  color: #ffffff;
 }

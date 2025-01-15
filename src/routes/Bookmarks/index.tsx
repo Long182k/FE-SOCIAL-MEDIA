@@ -39,7 +39,6 @@ function Bookmarks({ isDarkMode }: BookmarksProps): JSX.Element {
     mutationFn: bookmarkApi.deleteBookmark,
     onSuccess: () => {
       toast.success("Bookmark removed successfully");
-      // Invalidate and refetch bookmarks
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
     },
     onError: (error) => {

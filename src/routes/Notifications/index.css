@@ -85,3 +85,12 @@
 .notification-time {
   font-size: 12px;
 }
+
+/* Empty state styles */
+.notifications-layout.dark .ant-empty-description {
+  color: #ffffff;
+}
+
+.notifications-layout.dark .ant-empty-img-default path {
+  fill: #ffffff1a;
+}
