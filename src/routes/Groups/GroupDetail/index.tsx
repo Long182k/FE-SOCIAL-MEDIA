@@ -1,17 +1,21 @@
 import {
-  ShareAltOutlined,
-  UserAddOutlined,
   ArrowLeftOutlined,
+  ShareAltOutlined,
+  CheckOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
+  Empty,
   Layout,
   List,
+  Modal,
+  Skeleton,
   Space,
   Typography,
-  Skeleton,
+  message,
 } from "antd";
 import {
   Navigate,
@@ -21,6 +25,7 @@ import {
 } from "react-router-dom";
 import { groupApi, GroupPost } from "../../../api/group";
 import "./index.css";
+import { useState } from "react";
 
 const { Title, Text } = Typography;
 
@@ -32,6 +37,9 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const [isCopied, setIsCopied] = useState(false);
+  const [isJoinRequestsModalOpen, setIsJoinRequestsModalOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const groupName = location.state?.groupName || searchParams.get("groupName");
   const groupId = searchParams.get("groupId");
@@ -47,6 +55,54 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
     queryFn: () => groupApi.getGroupById(groupId!),
     enabled: !!groupId,
   });
+
+  const { data: joinRequests = [] } = useQuery({
+    queryKey: ["joinRequests", groupId],
+    queryFn: () => groupApi.getJoinRequests(groupId!),
+    enabled: !!groupId && isJoinRequestsModalOpen,
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: ({ requestId }: { requestId: string }) =>
+      groupApi.approveJoinRequest(groupId!, requestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["joinRequests", groupId] });
+      queryClient.invalidateQueries({ queryKey: ["group", groupId] });
+      message.success("Request approved successfully");
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: ({ requestId }: { requestId: string }) =>
+      groupApi.rejectJoinRequest(groupId!, requestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["joinRequests", groupId] });
+      message.success("Request rejected successfully");
+    },
+  });
+
+  const handleApprove = (requestId: string) => {
+    approveMutation.mutate({ requestId });
+  };
+
+  const handleReject = (requestId: string) => {
+    rejectMutation.mutate({ requestId });
+  };
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setIsCopied(true);
+      message.success("Group link copied to clipboard!");
+
+      // Reset the button after 2 seconds
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+    } catch (err) {
+      message.error("Failed to copy link");
+    }
+  };
 
   if (!groupId) {
     return <Navigate to="/groups" replace />;
@@ -105,6 +161,63 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
       </Layout>
     );
   }
+
+  const joinRequestsModal = (
+    <Modal
+      title="Join Requests"
+      open={isJoinRequestsModalOpen}
+      onCancel={() => setIsJoinRequestsModalOpen(false)}
+      footer={null}
+      style={{ top: 20 }}
+    >
+      <List
+        itemLayout="horizontal"
+        dataSource={joinRequests}
+        locale={{
+          emptyText: (
+            <Empty
+              description={
+                <span style={{ color: isDarkMode ? "#ffffff" : undefined }}>
+                  No pending requests
+                </span>
+              }
+            />
+          ),
+        }}
+        renderItem={(request) => (
+          <List.Item
+            key={request.id}
+            actions={[
+              <Button
+                key="approve"
+                type="primary"
+                onClick={() => handleApprove(request.id)}
+                loading={approveMutation.isPending}
+              >
+                Approve
+              </Button>,
+              <Button
+                key="reject"
+                danger
+                onClick={() => handleReject(request.id)}
+                loading={rejectMutation.isPending}
+              >
+                Reject
+              </Button>,
+            ]}
+          >
+            <List.Item.Meta
+              avatar={<Avatar src={request.user.avatarUrl} />}
+              title={request.user.userName}
+              description={`Requested on ${new Date(
+                request.createdAt
+              ).toLocaleDateString()}`}
+            />
+          </List.Item>
+        )}
+      />
+    </Modal>
+  );
 
   return (
     <Layout
@@ -177,24 +290,26 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
 
           <Space>
             <Button
-              icon={<UserAddOutlined />}
+              icon={isCopied ? <CheckOutlined /> : <ShareAltOutlined />}
+              onClick={handleShare}
               style={{
                 background: isDarkMode ? "#141414" : "#ffffff",
                 borderColor: isDarkMode ? "#303030" : "#d9d9d9",
                 color: isDarkMode ? "#ffffff" : "#000000",
               }}
             >
-              Invite
+              {isCopied ? "Copied" : "Share"}
             </Button>
             <Button
-              icon={<ShareAltOutlined />}
+              icon={<UserOutlined />}
+              onClick={() => setIsJoinRequestsModalOpen(true)}
               style={{
                 background: isDarkMode ? "#141414" : "#ffffff",
                 borderColor: isDarkMode ? "#303030" : "#d9d9d9",
                 color: isDarkMode ? "#ffffff" : "#000000",
               }}
             >
-              Share
+              View Join Requests
             </Button>
             <Button
               type="primary"
@@ -203,7 +318,7 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
                 borderColor: "#000000",
               }}
             >
-              Joined
+              Leave
             </Button>
           </Space>
         </div>
@@ -212,6 +327,17 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
           <List
             itemLayout="vertical"
             dataSource={groupPosts}
+            locale={{
+              emptyText: (
+                <Empty
+                  description={
+                    <span style={{ color: isDarkMode ? "#ffffff" : undefined }}>
+                      No posts yet
+                    </span>
+                  }
+                />
+              ),
+            }}
             renderItem={(post: GroupPost) => (
               <List.Item
                 key={post.id}
@@ -235,6 +361,7 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
           />
         </div>
       </div>
+      {joinRequestsModal}
     </Layout>
   );
 }

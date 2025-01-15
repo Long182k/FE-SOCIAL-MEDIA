@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { Button, Col, Form, Input, Row, Space, Typography } from "antd";
 import { AxiosError } from "axios";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { SCREEN_MODE } from "../../@util/constant/constant";
 import {
@@ -14,13 +13,12 @@ import { useAppStore } from "../../store";
 const { Title, Text } = Typography;
 
 const SignUpForm = ({ onSwitchMode }: RegisterFormProp) => {
-  const navigate = useNavigate();
   const { signup } = useAppStore();
 
   const SignUpFinish = async (values: RegisterNewUserParams) => {
     const userData = {
       email: values.email,
-      userName: values.userName,
+      username: values.username,
       password: values.password,
     };
 
@@ -31,13 +29,8 @@ const SignUpForm = ({ onSwitchMode }: RegisterFormProp) => {
     mutationFn: signup,
     onSuccess: (res) => {
       localStorage.setItem("access_token", res.accessToken);
-      toast.success(
-        "Login successfully"
-        // intl.formatMessage({
-        //   id: res?.data?.message,
-        // })
-      );
-      navigate("/");
+      toast.success("Register a new account successfully");
+      onSwitchMode(SCREEN_MODE.SIGN_IN);
     },
     onError: (error: AxiosError<ErrorResponseData>) => {
       if (error.response?.status === 401) {
@@ -72,7 +65,7 @@ const SignUpForm = ({ onSwitchMode }: RegisterFormProp) => {
           >
             <Form.Item
               label="Name"
-              name="userName"
+              name="username"
               rules={[{ required: true, message: "Please enter your name" }]}
             >
               <Input placeholder="Enter your name" />

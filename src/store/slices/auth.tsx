@@ -53,7 +53,6 @@ const createAuthState: StateCreator<AuthStore> = (set, get) => ({
       );
       set({ userInfo: response });
       localStorage.setItem("access_token", response.accessToken);
-      toast.success("Account created successfully");
       get().connectSocket();
       return response;
     } catch (error) {
