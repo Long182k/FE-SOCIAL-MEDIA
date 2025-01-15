@@ -29,6 +29,10 @@ const HomePage = ({ isDarkMode }: HomePageProps) => {
             background: isDarkMode ? "#141414" : "#fff",
             display: "flex",
             alignItems: "center",
+            padding: "0 16px",
+            position: "sticky",
+            top: 0,
+            zIndex: 1,
           }}
         >
           <Input
@@ -56,7 +60,9 @@ const HomePage = ({ isDarkMode }: HomePageProps) => {
           </div>
         </Header>
 
-        <Outlet />
+        <div className="scrollable-content">
+          <Outlet />
+        </div>
       </Layout>
 
       <SiderRight isDarkMode={isDarkMode} />

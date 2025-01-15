@@ -7,7 +7,6 @@ export const bookmarkApi = {
   getBookmarks: () => axiosClient.get<BookmarkResponse>("/bookmark"),
 
   deleteBookmark: (id: string) => {
-    console.log("id delete", id);
     return axiosClient.delete(`/bookmark/${id}`);
   },
 };

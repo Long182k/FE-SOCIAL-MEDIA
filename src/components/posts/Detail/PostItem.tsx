@@ -147,20 +147,20 @@ const PostItem = ({
 
           {/* Action buttons */}
 
-          <Space>
+          <Space className={`post-actions ${isDarkMode ? "dark" : ""}`}>
             {isOwner && (
               <>
                 <Button
                   type="text"
                   icon={<EditOutlined />}
-                  className={isDarkMode ? "dark" : ""}
                   onClick={() => onEdit?.(post)}
+                  className="edit-btn"
                 />
                 <Button
                   type="text"
                   icon={<DeleteOutlined />}
-                  className={isDarkMode ? "dark" : ""}
                   onClick={() => handleDeletePost?.(post.id)}
+                  className="delete-btn"
                 />
               </>
             )}

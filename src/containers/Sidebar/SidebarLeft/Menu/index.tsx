@@ -1,11 +1,12 @@
 import { Menu } from "antd";
 import "./menuItems.css";
 import { MenuItemsProps } from "./menuItems.interface";
-import { navRoutes } from "./navRoutes";
 import { useLocation } from "react-router-dom";
+import { useNavRoutes } from "./navRoutes";
 
 function MenuItems({ isDarkMode }: MenuItemsProps): JSX.Element {
   const location = useLocation();
+  const navRoutes = useNavRoutes();
 
   // Get the base path for selection
   const getSelectedKey = () => {
@@ -15,6 +16,7 @@ function MenuItems({ isDarkMode }: MenuItemsProps): JSX.Element {
     if (path.startsWith("/bookmarks")) return "bookmarks";
     if (path.startsWith("/messages")) return "messages";
     if (path.startsWith("/notifications")) return "notifications";
+    if (path.startsWith("/profile")) return "profile";
     if (path.startsWith("/settings")) return "settings";
     return "home";
   };

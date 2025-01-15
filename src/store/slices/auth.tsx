@@ -36,7 +36,7 @@ const createAuthState: StateCreator<AuthStore> = (set, get) => ({
   getAccessToken: () => get().accessToken,
   removeAccessToken: () => set({ accessToken: undefined }),
   addUserInfo: (userInfo: User) => set({ userInfo }),
-  getUserInfo: () => get().userInfo,
+  getUserInfo: (  ) => get().userInfo,
   removeUserInfo: () =>
     set({
       userInfo: undefined,
