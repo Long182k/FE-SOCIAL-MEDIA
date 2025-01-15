@@ -6,7 +6,16 @@ import {
   SaveOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Avatar, Button, Card, Image, Input, Space, Typography } from "antd";
+import {
+  Avatar,
+  Button,
+  Card,
+  Image,
+  Input,
+  Space,
+  Typography,
+  Tooltip,
+} from "antd";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { formatTimeAgo, isVideoUrl } from "../../../@util/helpers";
@@ -18,6 +27,9 @@ import { bookmarkApi } from "../../../api/bookmark";
 import { renderContent } from "../../generalRender/renderContent";
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
+import { useAppStore } from "../../../store";
+import { useNavigate } from "react-router-dom";
+
 interface PostItemProps {
   post: Post;
   currentUserId: string;
@@ -26,6 +38,19 @@ interface PostItemProps {
   refetchPosts: () => void;
   onEdit: (post: Post) => void;
 }
+
+const getSentimentMessage = (sentiment: string) => {
+  switch (sentiment) {
+    case "GOOD":
+      return "This post has a positive sentiment based on its content";
+    case "MODERATE":
+      return "This post has a neutral sentiment based on its content";
+    case "BAD":
+      return "This post has a negative sentiment based on its content";
+    default:
+      return "Sentiment analysis not available";
+  }
+};
 
 const PostItem = ({
   post,
@@ -36,11 +61,13 @@ const PostItem = ({
   refetchPosts,
 }: PostItemProps) => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const [commentModalVisible, setCommentModalVisible] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const { userInfo } = useAppStore();
 
   const isOwner = post.userId === currentUserId;
 
@@ -106,6 +133,10 @@ const PostItem = ({
     deletePostMutation.mutate(postId);
   };
 
+  const handleNavigateToProfile = (userId: string) => {
+    navigate(`/profile?userId=${userId}`);
+  };
+
   return (
     <Card
       className={`post-item ${isDarkMode ? "dark" : "light"}`}
@@ -125,7 +156,12 @@ const PostItem = ({
           style={{ width: "100%", justifyContent: "space-between" }}
         >
           <Space>
-            <Avatar src={post.user.avatarUrl} size={40} />
+            <Avatar
+              src={post.user.avatarUrl}
+              size={40}
+              style={{ cursor: "pointer" }}
+              onClick={() => handleNavigateToProfile(post.userId)}
+            />
             <div>
               <Typography.Text
                 strong
@@ -133,15 +169,23 @@ const PostItem = ({
               >
                 {post.user.userName}
               </Typography.Text>
-              <Typography.Text
-                type="secondary"
-                style={{
-                  color: isDarkMode ? "#b0b3b8" : "rgb(0,0,0,0.45)",
-                  marginLeft: "8px",
-                }}
-              >
-                {formatTimeAgo(new Date(post.createdAt))}
-              </Typography.Text>
+              <div className="post-header-right">
+                <Typography.Text
+                  type="secondary"
+                  style={{
+                    color: isDarkMode ? "#b0b3b8" : "rgb(0,0,0,0.45)",
+                    marginLeft: "8px",
+                  }}
+                >
+                  {formatTimeAgo(new Date(post.createdAt))}
+                </Typography.Text>
+                <Tooltip title={getSentimentMessage(post.sentiment)}>
+                  <div
+                    className={`sentiment-indicator sentiment-${post.sentiment.toLowerCase()}`}
+                    aria-label={`Sentiment: ${post.sentiment}`}
+                  />
+                </Tooltip>
+              </div>
             </div>
           </Space>
 
@@ -302,7 +346,7 @@ const PostItem = ({
           >
             {/* Quick Comment Input */}
             <Space style={{ width: "100%", marginBottom: 16 }}>
-              <Avatar src={post.user.avatarUrl} alt={post.user.userName} />
+              <Avatar src={userInfo.avatarUrl} alt={userInfo.userName} />
               <Input.TextArea
                 placeholder="Write a comment..."
                 autoSize={{ minRows: 1, maxRows: 2 }}
