@@ -338,6 +338,7 @@ const ProfileScreen = ({ isDarkMode }: ProfileScreenProps) => {
             <DatePicker
               style={{ width: "100%" }}
               placeholder="Select your birth date"
+              className={isDarkMode ? "dark-date-picker" : ""}
             />
           </Form.Item>
           <Form.Item label="Bio :" name="bio">
