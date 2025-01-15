@@ -277,7 +277,7 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
                   onClick={() => cancelAttendanceMutation.mutate(undefined)}
                   loading={cancelAttendanceMutation.isPending}
                 >
-                  Leave Event
+                  Leave
                 </Button>
               )
             )}

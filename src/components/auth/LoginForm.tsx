@@ -33,9 +33,6 @@ const LoginForm = ({ onSwitchMode }: LoginFormProp) => {
 
       toast.success(
         "Login successfully"
-        // intl.formatMessage({
-        //   id: res?.data?.message,
-        // })
       );
 
       navigate("/");

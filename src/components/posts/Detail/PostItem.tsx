@@ -13,21 +13,21 @@ import {
   Image,
   Input,
   Space,
-  Typography,
   Tooltip,
+  Typography,
 } from "antd";
+import Plyr from "plyr-react";
+import "plyr-react/plyr.css";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { formatTimeAgo, isVideoUrl } from "../../../@util/helpers";
 import { CreateCommentDto, Post } from "../../../@util/types/post.type";
+import { bookmarkApi } from "../../../api/bookmark";
 import { postApi } from "../../../api/post";
+import { useAppStore } from "../../../store";
+import { renderContent } from "../../generalRender/renderContent";
 import CommentItem from "./CommentItem";
 import "./PostItem.css";
-import { bookmarkApi } from "../../../api/bookmark";
-import { renderContent } from "../../generalRender/renderContent";
-import Plyr from "plyr-react";
-import "plyr-react/plyr.css";
-import { useAppStore } from "../../../store";
 import { useNavigate } from "react-router-dom";
 
 interface PostItemProps {

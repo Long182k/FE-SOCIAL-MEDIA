@@ -6,6 +6,8 @@ import { getTextColor } from "../../@util/helpers";
 import SidebarLeft from "../../containers/Sidebar/SidebarLeft";
 import SiderRight from "../../containers/Sidebar/SidebarRight";
 import { useAppStore } from "../../store";
+import { useNavigate } from "react-router-dom";
+
 import "./index.css";
 
 const { Header } = Layout;
@@ -17,6 +19,11 @@ interface HomePageProps {
 
 const HomePage = ({ isDarkMode }: HomePageProps) => {
   const { userInfo } = useAppStore();
+  const navigate = useNavigate();
+
+  const handleNavigateToProfile = (userId: string) => {
+    navigate(`/profile?userId=${userId}`);
+  };
 
   return (
     <Layout className="homepage-layout">
@@ -53,7 +60,13 @@ const HomePage = ({ isDarkMode }: HomePageProps) => {
             className="header-right"
             style={{ display: "flex", alignItems: "center" }}
           >
-            <Avatar src={userInfo.avatarUrl} size={40} />
+            <Avatar
+              src={userInfo.avatarUrl}
+              size={40}
+              alt={userInfo.userName}
+              style={{ cursor: "pointer" }}
+              onClick={() => handleNavigateToProfile(userInfo.id)}
+            />
             <Text strong style={getTextColor(isDarkMode)}>
               {userInfo.userName}
             </Text>

@@ -5,7 +5,7 @@ import {
   CheckOutlined,
   HeartOutlined,
 } from "@ant-design/icons";
-import { Button, DatePicker, Form, Input, Modal, Upload } from "antd";
+import { Button, DatePicker, Form, Input, message, Modal, Upload } from "antd";
 import moment from "moment";
 import { useState } from "react";
 import { useAppStore } from "../../store";
@@ -145,7 +145,7 @@ const ProfileScreen = ({ isDarkMode }: ProfileScreenProps) => {
     const profileUrl = `${window.location.origin}/profile?userId=${userId}`;
     navigator.clipboard.writeText(profileUrl);
     setIsCopied(true);
-    toast.success("Profile URL copied to clipboard!");
+    message.success("Profile URL copied to clipboard!");
 
     // Reset the icon after 2 seconds
     setTimeout(() => {
