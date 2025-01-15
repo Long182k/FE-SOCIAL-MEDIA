@@ -174,7 +174,7 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
   };
 
   return (
-    <Layout style={{ background: "#1E1F22" }}>
+    <Layout style={{ background: "white", height: "-webkit-fill-available" }}>
       <Layout.Sider width={250} style={{ background: "#2B2D31" }}>
         <div style={{ padding: "20px" }}>
           <div style={{ marginBottom: "20px" }}>
@@ -278,6 +278,7 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
           </div>
         </div>
       </Layout.Sider>
+
       <Layout.Content style={{ background: "#313338" }}>
         {selectedChatRoom && (
           <div
