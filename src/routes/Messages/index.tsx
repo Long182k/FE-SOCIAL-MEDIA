@@ -176,7 +176,7 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
   return (
     <Layout
       style={{
-        background: isDarkMode ? "#1E1F22" : "#ffffff",
+        background: isDarkMode ? "rgb(0 0 0)" : "rgb(245, 245, 245)",
         height: "100%",
         overflow: "hidden",
       }}
@@ -184,7 +184,7 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
       <Layout.Sider
         width={250}
         style={{
-          background: isDarkMode ? "#2B2D31" : "#f0f2f5",
+          background: isDarkMode ? "rgb(0 0 0)" : "rgb(245, 245, 245)",
           height: "100%",
           overflowY: "auto",
           borderRight: `1px solid ${isDarkMode ? "#3F4147" : "#e4e6eb"}`,
@@ -250,7 +250,7 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
             />
           </div>
 
-          <div>
+          {/* <div>
             <div
               style={{
                 display: "flex",
@@ -296,13 +296,13 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
                 )}
               />
             )}
-          </div>
+          </div> */}
         </div>
       </Layout.Sider>
 
       <Layout.Content
         style={{
-          background: isDarkMode ? "#313338" : "#ffffff",
+          background: isDarkMode ? "rgb(0 0 0)" : "#ffffff",
           height: "100%",
           display: "flex",
           flexDirection: "column",
@@ -342,10 +342,10 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
                         style={{
                           backgroundColor: isDarkMode
                             ? message.senderId === currentUserId
-                              ? "#6272a4"
+                              ? "#44475a"
                               : "#44475a"
                             : message.senderId === currentUserId
-                            ? "#0084ff"
+                            ? "#f0f2f5"
                             : "#f0f2f5",
                           color: isDarkMode
                             ? "#ffffff"
@@ -388,7 +388,7 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
               style={{
                 padding: "20px",
                 borderTop: `1px solid ${isDarkMode ? "#3F4147" : "#e4e6eb"}`,
-                background: isDarkMode ? "#313338" : "#ffffff",
+                // background: isDarkMode ? "#313338" : "#ffffff",
               }}
             >
               <Space.Compact style={{ display: "flex", alignItems: "center" }}>
