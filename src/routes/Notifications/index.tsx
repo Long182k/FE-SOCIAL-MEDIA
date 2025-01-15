@@ -1,110 +1,108 @@
-import { Layout, List, Avatar, Typography, Space } from "antd";
-import { EllipsisOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import { DeleteOutlined } from "@ant-design/icons";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Avatar, Layout, List, message, Space, Typography } from "antd";
+import { formatDistanceToNow } from "date-fns";
+import { notificationApi, NotificationResponse } from "../../api/notification";
+import "./index.css";
 
 interface NotificationProps {
   isDarkMode: boolean;
 }
 
-interface Notification {
-  id: string;
-  username: string;
-  action: string;
-  timestamp: string;
-  avatar?: string;
-}
-
 function Notifications({ isDarkMode }: NotificationProps): JSX.Element {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const queryClient = useQueryClient();
 
-  // Simulated notifications data - replace with actual API call
-  useEffect(() => {
-    const dummyNotifications = [
-      {
-        id: "1",
-        username: "@wesbos",
-        action: "liked your reply",
-        timestamp: "1 min ago",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=1",
-      },
-      // Add more dummy notifications as needed
-    ];
-    setNotifications(dummyNotifications);
-  }, []);
+  // Fetch notifications
+  const { data: notifications, isLoading } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      const response = await notificationApi.findAll();
+      return response.data;
+    },
+  });
+
+  // Delete notification mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => notificationApi.remove(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      message.success("Notification deleted successfully");
+    },
+    onError: () => {
+      message.error("Failed to delete notification");
+    },
+  });
+
+  // Mark as read mutation
+  const markAsReadMutation = useMutation({
+    mutationFn: (id: string) => notificationApi.updateIsRead(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id);
+  };
+
+  const handleMarkAsRead = (id: string) => {
+    markAsReadMutation.mutate(id);
+  };
 
   return (
     <Layout
-      className="main-content-layout"
-      style={{
-        background: isDarkMode ? "#141414" : "#ffffff",
-        padding: "0 24px",
-      }}
+      className={`notifications-layout ${isDarkMode ? "dark" : "light"}`}
     >
       <Typography.Title
         level={1}
-        style={{
-          color: isDarkMode ? "#ffffff" : "#000000",
-          padding: "16px 0",
-          margin: 0,
-          fontSize: "24px",
-        }}
+        className={`notifications-title ${isDarkMode ? "dark" : "light"}`}
       >
         All Notifications
       </Typography.Title>
 
       <List
+        loading={isLoading}
         itemLayout="horizontal"
         dataSource={notifications}
-        renderItem={(item) => (
+        renderItem={(item: NotificationResponse) => (
           <List.Item
             key={item.id}
             actions={[
-              <EllipsisOutlined
-                key="ellipsis"
-                style={{
-                  fontSize: "20px",
-                  color: isDarkMode ? "#ffffff80" : "#00000080",
-                }}
+              <DeleteOutlined
+                key="delete"
+                onClick={() => handleDelete(item.id)}
+                className={`notification-delete-icon ${isDarkMode ? "dark" : "light"}`}
               />,
             ]}
-            style={{
-              padding: "12px 0",
-              borderBottom: `1px solid ${
-                isDarkMode ? "#ffffff1a" : "#0000000a"
-              }`,
-            }}
+            onClick={() => !item.isRead && handleMarkAsRead(item.id)}
+            className={`notification-item ${isDarkMode ? "dark" : "light"} ${
+              !item.isRead ? "unread" : ""
+            }`}
           >
             <List.Item.Meta
               avatar={
-                item.avatar ? (
-                  <Avatar src={item.avatar} size={40} />
+                item.sender.avatarUrl ? (
+                  <Avatar src={item.sender.avatarUrl} size={40} />
                 ) : (
-                  <Avatar size={40}>{item.username[0]}</Avatar>
+                  <Avatar size={40}>{item.sender.userName[0]}</Avatar>
                 )
               }
               title={
                 <Space>
                   <Typography.Text
-                    strong
-                    style={{ color: isDarkMode ? "#ffffff" : "#000000" }}
+                    className={`notification-content ${isDarkMode ? "dark" : "light"}`}
                   >
-                    {item.username}
-                  </Typography.Text>
-                  <Typography.Text
-                    style={{ color: isDarkMode ? "#ffffff99" : "#00000099" }}
-                  >
-                    {item.action}
+                    {item.content}
                   </Typography.Text>
                 </Space>
               }
               description={
                 <Typography.Text
-                  style={{
-                    color: isDarkMode ? "#ffffff60" : "#00000060",
-                    fontSize: "12px",
-                  }}
+                  className={`notification-time ${isDarkMode ? "dark" : "light"}`}
                 >
-                  {item.timestamp}
+                  {formatDistanceToNow(new Date(item.createdAt), {
+                    addSuffix: true,
+                  })}
                 </Typography.Text>
               }
             />
