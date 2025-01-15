@@ -54,6 +54,7 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
   const [modalType, setModalType] = useState<"DIRECT" | "GROUP">("DIRECT");
   const [nameChatRoom, setNameChatRoom] = useState<string>("");
   const [selectedUser, setSelectedUser] = useState<string>("");
+  const { userInfo } = useAppStore();
 
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -90,12 +91,7 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
     };
   }, [socket, subscribeToMessages, unsubscribeFromMessages]);
 
-  const {
-    data: chatRoomsQuery,
-    isLoading: isLoadingChatRooms,
-    // refetch: refetchChatRooms,
-    // isRefetching: isRefetchingChatRooms,
-  } = useQuery<ChatRoom[], Error>({
+  const { data: chatRoomsQuery } = useQuery<ChatRoom[], Error>({
     queryKey: ["chatRooms", currentUserId],
     queryFn: () => getChatRoom(currentUserId),
     refetchOnWindowFocus: false,
@@ -112,18 +108,11 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
   const sendMessageMutation = useMutation({
     mutationFn: sendMessage,
     onSuccess: () => {
-      // if (selectedChatRoom && selectedChatRoom.id) {
-      //   getMessages(selectedChatRoom.id);
-      // }
-
       setContent("");
     },
     onError: (error) => {
       toast.error(error.message);
     },
-    // onSettled: () => {
-    //   unsubscribeFromMessages();
-    // },
   });
 
   const createDirectChatMutation = useMutation({
@@ -350,7 +339,7 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
                           color: isDarkMode
                             ? "#ffffff"
                             : message.senderId === currentUserId
-                            ? "#ffffff"
+                            ? "#000000"
                             : "#000000",
                         }}
                       >
@@ -411,6 +400,7 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
                     border: "none",
                     color: isDarkMode ? "#fff" : "#000",
                   }}
+                  className={isDarkMode ? "dark-input" : ""}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -432,44 +422,59 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
         title={modalType === "DIRECT" ? "Select Contact" : "Create Channel"}
         open={contactsModalVisible}
         onCancel={() => setContactsModalVisible(false)}
+        className={isDarkMode ? "dark-modal" : ""}
+        style={{ top: "30%" }}
         footer={[
-          <Button
-            key="back"
-            onClick={(e) => {
-              e.preventDefault();
-              setContactsModalVisible(false);
-            }}
-          >
+          <Button key="cancel" onClick={() => setContactsModalVisible(false)}>
             Cancel
           </Button>,
           <Button
             key="submit"
             type="primary"
-            onClick={(e) => {
-              e.preventDefault();
-              handleCreateDirectChat();
-            }}
+            onClick={handleCreateDirectChat}
+            disabled={!selectedUser}
           >
-            {modalType === "DIRECT" ? "Start Conversation" : "Create Channel"}
+            Start Conversation
           </Button>,
         ]}
       >
         {isLoadingContacts ? (
-          <div style={{ color: "#fff" }}>Loading contacts...</div>
+          <div style={{ color: isDarkMode ? "#fff" : "#000" }}>
+            Loading contacts...
+          </div>
         ) : (
           <Select
-            value={selectedUser} // Use the ID instead of the entire user object
+            value={selectedUser}
             onChange={(value) => {
               const selected = contactsQuery?.find(
                 (contact: User) => contact.id === value
               );
-
               if (selected) setSelectedUser(selected.id);
             }}
             style={{ width: "100%" }}
+            className={isDarkMode ? "dark-select" : ""}
+            placeholder="Select a user to chat with"
+            popupClassName={isDarkMode ? "dark-select-dropdown" : ""}
+            optionFilterProp="children"
+            notFoundContent="No contacts available"
+            virtual={false}
+            showSearch={false}
+            onDropdownVisibleChange={(open) => {
+              // Force rerender of dropdown when opened
+              if (open) {
+                setTimeout(() => {
+                  const event = new Event("resize");
+                  window.dispatchEvent(event);
+                }, 100);
+              }
+            }}
           >
             {contactsQuery?.map((contact: User) => (
-              <Select.Option key={contact.id} value={contact.id}>
+              <Select.Option
+                key={contact.id}
+                value={contact.id}
+                disabled={contact.id === userInfo.userId}
+              >
                 {contact.userName}
               </Select.Option>
             ))}

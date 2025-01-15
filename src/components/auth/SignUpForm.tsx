@@ -6,15 +6,16 @@ import { toast } from "react-toastify";
 import { SCREEN_MODE } from "../../@util/constant/constant";
 import {
   ErrorResponseData,
-  LoginFormProp,
+  RegisterFormProp,
 } from "../../@util/interface/auth.interface";
 import { RegisterNewUserParams } from "../../@util/types/auth.type";
-import { registerNewUser } from "../../api/auth";
+import { useAppStore } from "../../store";
 
 const { Title, Text } = Typography;
 
-const SignUpForm = ({ onSwitchMode }: LoginFormProp) => {
+const SignUpForm = ({ onSwitchMode }: RegisterFormProp) => {
   const navigate = useNavigate();
+  const { signup } = useAppStore();
 
   const SignUpFinish = async (values: RegisterNewUserParams) => {
     const userData = {
@@ -27,9 +28,9 @@ const SignUpForm = ({ onSwitchMode }: LoginFormProp) => {
   };
 
   const createUserMutation = useMutation({
-    mutationFn: registerNewUser,
+    mutationFn: signup,
     onSuccess: (res) => {
-      localStorage.setItem("access_token", res.data.accessToken);
+      localStorage.setItem("access_token", res.accessToken);
       toast.success(
         "Login successfully"
         // intl.formatMessage({

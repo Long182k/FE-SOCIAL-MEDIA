@@ -2,7 +2,11 @@ import { toast } from "react-toastify";
 import { io } from "socket.io-client";
 import { StateCreator } from "zustand";
 import { persist, PersistOptions } from "zustand/middleware";
-import { AuthStore, LoginResponse } from "../../@util/interface/auth.interface";
+import {
+  AuthStore,
+  LoginResponse,
+  RegisterResponse,
+} from "../../@util/interface/auth.interface";
 import {
   LoginParams,
   RegisterNewUserParams,
@@ -36,22 +40,27 @@ const createAuthState: StateCreator<AuthStore> = (set, get) => ({
   getAccessToken: () => get().accessToken,
   removeAccessToken: () => set({ accessToken: undefined }),
   addUserInfo: (userInfo: User) => set({ userInfo }),
-  getUserInfo: (  ) => get().userInfo,
+  getUserInfo: () => get().userInfo,
   removeUserInfo: () =>
     set({
       userInfo: undefined,
     }),
-  signup: async (data: RegisterNewUserParams) => {
+  signup: async (data: RegisterNewUserParams): Promise<RegisterResponse> => {
     try {
-      const res = await axiosInitialClient.post("/auth/register", data);
-      set({ userInfo: res.data });
+      const { data: response } = await axiosInitialClient.post(
+        "/auth/register",
+        data
+      );
+      set({ userInfo: response });
+      localStorage.setItem("access_token", response.accessToken);
       toast.success("Account created successfully");
       get().connectSocket();
+      return response;
     } catch (error) {
       console.log("error", error);
+      throw error;
     }
   },
-
   login: async (data: LoginParams): Promise<LoginResponse> => {
     try {
       const { data: dataResponse } = await axiosInitialClient.post(
