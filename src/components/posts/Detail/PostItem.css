@@ -40,4 +40,55 @@
 
 .action-button.dark:hover .anticon {
   color: #1677ff !important;
-} 
+}
+
+/* Dark mode action buttons */
+.dark .ant-btn-text {
+  color: #ffffff !important;
+}
+
+.dark .ant-btn-text:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+/* Specific to post action buttons to not affect other text buttons */
+.post-actions .ant-btn-text {
+  padding: 4px 8px;
+}
+
+.post-actions.dark .ant-btn-text {
+  color: #ffffff;
+}
+
+.post-actions.dark .ant-btn-text:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Post action buttons hover effects */
+.post-actions .ant-btn-text:hover {
+  background-color: transparent !important;
+}
+
+/* Edit button hover */
+.post-actions .edit-btn:hover {
+  color: #1890ff !important;
+}
+
+/* Delete button hover */
+.post-actions .delete-btn:hover {
+  color: #ff4d4f !important;
+}
+
+/* Dark mode adjustments */
+.post-actions.dark .ant-btn-text {
+  color: #ffffff;
+}
+
+.post-actions.dark .edit-btn:hover {
+  color: #40a9ff !important;
+}
+
+.post-actions.dark .delete-btn:hover {
+  color: #ff7875 !important;
+}

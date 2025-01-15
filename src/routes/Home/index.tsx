@@ -55,7 +55,7 @@ const HomePage = ({ isDarkMode }: HomePageProps) => {
             </Text>
           </div>
         </Header>
-
+        // Outlet is CenterContent (powered by React Router)
         <Outlet />
       </Layout>
 

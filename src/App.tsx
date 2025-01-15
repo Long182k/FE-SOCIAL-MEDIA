@@ -68,7 +68,7 @@ function App() {
                 element={
                   <CenterContent
                     isDarkMode={isDarkMode}
-                    currentUserId={userInfo?.userId ?? ""}
+                    currentUserId={userInfo?.userId ?? userInfo?.id}
                     userAvatar={userInfo?.avatarUrl ?? ""}
                   />
                 }

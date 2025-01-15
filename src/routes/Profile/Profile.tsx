@@ -278,7 +278,7 @@ const ProfileScreen = ({ isDarkMode }: ProfileScreenProps) => {
             Birth Date:{" "}
             {userDetail?.dateOfBirth
               ? formatBirthDate(userDetail.dateOfBirth)
-              : "Not set"}
+              : "N/A"}
           </p>
           <p className="bio">{userDetail?.bio}</p>
 
