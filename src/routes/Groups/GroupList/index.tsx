@@ -82,14 +82,11 @@ function GroupList({ isDarkMode }: GroupListProps) {
 
   const handleGroupClick = (group: Group) => {
     if (groupType === "joined") {
-      navigate(
-        `/groups/detail?groupType=joined&groupId=${group.id}&adminId=${group.creatorId}`,
-        {
-          state: {
-            groupName: group.name,
-          },
-        }
-      );
+      navigate(`/groups/detail?groupId=${group.id}`, {
+        state: {
+          groupName: group.name,
+        },
+      });
     }
   };
 

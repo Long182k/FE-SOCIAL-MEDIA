@@ -1,25 +1,24 @@
 import { useMutation } from "@tanstack/react-query";
 import { Button, Col, Form, Input, Row, Space, Typography } from "antd";
 import { AxiosError } from "axios";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { SCREEN_MODE } from "../../@util/constant/constant";
 import {
   ErrorResponseData,
-  LoginFormProp,
+  RegisterFormProp,
 } from "../../@util/interface/auth.interface";
 import { RegisterNewUserParams } from "../../@util/types/auth.type";
-import { registerNewUser } from "../../api/auth";
+import { useAppStore } from "../../store";
 
 const { Title, Text } = Typography;
 
-const SignUpForm = ({ onSwitchMode }: LoginFormProp) => {
-  const navigate = useNavigate();
+const SignUpForm = ({ onSwitchMode }: RegisterFormProp) => {
+  const { signup } = useAppStore();
 
   const SignUpFinish = async (values: RegisterNewUserParams) => {
     const userData = {
       email: values.email,
-      userName: values.userName,
+      username: values.username,
       password: values.password,
     };
 
@@ -27,16 +26,11 @@ const SignUpForm = ({ onSwitchMode }: LoginFormProp) => {
   };
 
   const createUserMutation = useMutation({
-    mutationFn: registerNewUser,
+    mutationFn: signup,
     onSuccess: (res) => {
-      localStorage.setItem("access_token", res.data.accessToken);
-      toast.success(
-        "Login successfully"
-        // intl.formatMessage({
-        //   id: res?.data?.message,
-        // })
-      );
-      navigate("/");
+      localStorage.setItem("access_token", res.accessToken);
+      toast.success("Register a new account successfully");
+      onSwitchMode(SCREEN_MODE.SIGN_IN);
     },
     onError: (error: AxiosError<ErrorResponseData>) => {
       if (error.response?.status === 401) {
@@ -71,7 +65,7 @@ const SignUpForm = ({ onSwitchMode }: LoginFormProp) => {
           >
             <Form.Item
               label="Name"
-              name="userName"
+              name="username"
               rules={[{ required: true, message: "Please enter your name" }]}
             >
               <Input placeholder="Enter your name" />

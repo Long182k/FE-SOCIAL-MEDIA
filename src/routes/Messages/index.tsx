@@ -22,15 +22,16 @@ import { User } from "../../@util/types/auth.type";
 import { convertToHumanTime } from "../../@util/helpers";
 import { ChatRoom } from "../../@util/interface/chat.interface";
 import { useAppStore } from "../../store";
-import "./Chat.css"; // Custom CSS for chat bubble styles
+import "./chat.css"; // Custom CSS for chat bubble styles
 
 const { Text } = Typography;
 
 type MessageProps = {
   currentUserId: string;
+  isDarkMode: boolean;
 };
 
-const MessageApp = ({ currentUserId }: MessageProps) => {
+const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
   const { Title } = Typography;
 
   const {
@@ -53,6 +54,7 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
   const [modalType, setModalType] = useState<"DIRECT" | "GROUP">("DIRECT");
   const [nameChatRoom, setNameChatRoom] = useState<string>("");
   const [selectedUser, setSelectedUser] = useState<string>("");
+  const { userInfo } = useAppStore();
 
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -89,12 +91,7 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
     };
   }, [socket, subscribeToMessages, unsubscribeFromMessages]);
 
-  const {
-    data: chatRoomsQuery,
-    isLoading: isLoadingChatRooms,
-    // refetch: refetchChatRooms,
-    // isRefetching: isRefetchingChatRooms,
-  } = useQuery<ChatRoom[], Error>({
+  const { data: chatRoomsQuery } = useQuery<ChatRoom[], Error>({
     queryKey: ["chatRooms", currentUserId],
     queryFn: () => getChatRoom(currentUserId),
     refetchOnWindowFocus: false,
@@ -111,18 +108,11 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
   const sendMessageMutation = useMutation({
     mutationFn: sendMessage,
     onSuccess: () => {
-      // if (selectedChatRoom && selectedChatRoom.id) {
-      //   getMessages(selectedChatRoom.id);
-      // }
-
       setContent("");
     },
     onError: (error) => {
       toast.error(error.message);
     },
-    // onSettled: () => {
-    //   unsubscribeFromMessages();
-    // },
   });
 
   const createDirectChatMutation = useMutation({
@@ -173,8 +163,22 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
   };
 
   return (
-    <Layout style={{ height: "20vh", background: "#1E1F22" }}>
-      <Layout.Sider width={250} style={{ background: "#2B2D31" }}>
+    <Layout
+      style={{
+        background: isDarkMode ? "rgb(0 0 0)" : "rgb(245, 245, 245)",
+        height: "100%",
+        overflow: "hidden",
+      }}
+    >
+      <Layout.Sider
+        width={250}
+        style={{
+          background: isDarkMode ? "rgb(0 0 0)" : "rgb(245, 245, 245)",
+          height: "100%",
+          overflowY: "auto",
+          borderRight: `1px solid ${isDarkMode ? "#3F4147" : "#e4e6eb"}`,
+        }}
+      >
         <div style={{ padding: "20px" }}>
           <div style={{ marginBottom: "20px" }}>
             <div
@@ -184,51 +188,58 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
                 alignItems: "center",
               }}
             >
-              <Title level={5} style={{ color: "#96989D", margin: 0 }}>
+              <Title
+                level={5}
+                style={{
+                  color: isDarkMode ? "#96989D" : "#65676b",
+                  margin: 0,
+                }}
+              >
                 DIRECT MESSAGES
               </Title>
               <Button
                 type="text"
-                icon={<PlusOutlined style={{ color: "#96989D" }} />}
+                icon={
+                  <PlusOutlined
+                    style={{
+                      color: isDarkMode ? "#96989D" : "#65676b",
+                    }}
+                  />
+                }
                 onClick={() => showModal("DIRECT", "hi")}
               />
             </div>
-            {isLoadingChatRooms ? (
-              <div style={{ color: "#fff" }}>Loading DIRECT messages...</div>
-            ) : (
-              <List
-                dataSource={
-                  (chatRoomsQuery as ChatRoom[])?.filter(
-                    (room) => room.type === "DIRECT"
-                  ) || []
-                }
-                renderItem={(room) => (
-                  <List.Item
-                    key={room.id}
-                    onClick={() => {
-                      handleSelectChatRoom(room);
-                    }}
-                    style={{
-                      padding: "8px",
-                      cursor: "pointer",
-                      color: "#96989D",
-                      borderRadius: "4px",
-                      background:
-                        selectedChatRoom?.id === room.id
+
+            <List
+              dataSource={chatRoomsQuery?.filter(
+                (room) => room.type === "DIRECT"
+              )}
+              renderItem={(room) => (
+                <List.Item
+                  key={room.id}
+                  onClick={() => handleSelectChatRoom(room)}
+                  style={{
+                    padding: "8px",
+                    cursor: "pointer",
+                    color: isDarkMode ? "#96989D" : "#65676b",
+                    borderRadius: "4px",
+                    background:
+                      selectedChatRoom?.id === room.id
+                        ? isDarkMode
                           ? "#393C43"
-                          : "transparent",
-                    }}
-                  >
-                    {room.participants?.find(
-                      (participant) => participant.userId !== currentUserId
-                    )?.user?.userName || "Unknown User"}
-                  </List.Item>
-                )}
-              />
-            )}
+                          : "#e3e5e8"
+                        : "transparent",
+                  }}
+                >
+                  {room.participants?.find(
+                    (participant) => participant.userId !== currentUserId
+                  )?.user?.userName || "Unknown User"}
+                </List.Item>
+              )}
+            />
           </div>
 
-          <div>
+          {/* <div>
             <div
               style={{
                 display: "flex",
@@ -274,17 +285,31 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
                 )}
               />
             )}
-          </div>
+          </div> */}
         </div>
       </Layout.Sider>
-      <Layout.Content style={{ background: "#313338" }}>
+
+      <Layout.Content
+        style={{
+          background: isDarkMode ? "rgb(0 0 0)" : "#ffffff",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         {selectedChatRoom && (
-          <div
-            style={{ height: "100%", display: "flex", flexDirection: "column" }}
-          >
-            <div style={{ flex: 1, padding: "20px", overflowY: "auto" }}>
+          <>
+            <div
+              style={{
+                flex: 1,
+                overflowY: "auto",
+                padding: "20px",
+              }}
+            >
               {isMessagesLoading ? (
-                <div style={{ color: "#fff" }}>Loading messages...</div>
+                <div style={{ color: isDarkMode ? "#fff" : "#000" }}>
+                  Loading messages...
+                </div>
               ) : (
                 <div className="chat-container">
                   {messages?.map((message) => (
@@ -301,10 +326,38 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
                           className="avatar"
                         />
                       )}
-                      <div className="bubble">
-                        <Text className="author">{message.user?.userName}</Text>
+                      <div
+                        className="bubble"
+                        style={{
+                          backgroundColor: isDarkMode
+                            ? message.senderId === currentUserId
+                              ? "#44475a"
+                              : "#44475a"
+                            : message.senderId === currentUserId
+                            ? "#f0f2f5"
+                            : "#f0f2f5",
+                          color: isDarkMode
+                            ? "#ffffff"
+                            : message.senderId === currentUserId
+                            ? "#000000"
+                            : "#000000",
+                        }}
+                      >
+                        <Text
+                          className="author"
+                          style={{
+                            color: isDarkMode ? "#ffffff" : "#000000",
+                          }}
+                        >
+                          {message.user?.userName}
+                        </Text>
                         <p className="content">{message.content}</p>
-                        <Text className="timestamp">
+                        <Text
+                          className="timestamp"
+                          style={{
+                            color: isDarkMode ? "#b0b0b0" : "#65676b",
+                          }}
+                        >
                           {convertToHumanTime(message?.createdAt ?? "")}
                         </Text>
                       </div>
@@ -320,40 +373,48 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
               )}
             </div>
 
-            <div style={{ padding: "20px", borderTop: "1px solid #3F4147" }}>
+            <div
+              style={{
+                padding: "20px",
+                borderTop: `1px solid ${isDarkMode ? "#3F4147" : "#e4e6eb"}`,
+                // background: isDarkMode ? "#313338" : "#ffffff",
+              }}
+            >
               <Space.Compact style={{ display: "flex", alignItems: "center" }}>
-                {/* Attachment Button */}
                 <Button
                   type="text"
-                  icon={<PaperClipOutlined style={{ color: "#B5BAC1" }} />}
+                  icon={
+                    <PaperClipOutlined
+                      style={{
+                        color: isDarkMode ? "#B5BAC1" : "#65676b",
+                      }}
+                    />
+                  }
                   style={{ marginRight: "8px" }}
                 />
-
-                {/* Input Field */}
                 <Input
                   placeholder="Enter message"
                   style={{
                     flex: 1,
-                    background: "#383A40",
+                    background: isDarkMode ? "#383A40" : "#f0f2f5",
                     border: "none",
-                    color: "#fff",
+                    color: isDarkMode ? "#fff" : "#000",
                   }}
+                  className={isDarkMode ? "dark-input" : ""}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  onKeyDown={handleKeyDown} // Detect Enter key press
+                  onKeyDown={handleKeyDown}
                 />
-
-                {/* Send Button */}
                 <Button
                   type="primary"
                   icon={<SendOutlined />}
-                  onClick={handleSendMessage} // Trigger send on button click
-                  loading={sendMessageMutation.isPending} // Show loading state
+                  onClick={handleSendMessage}
+                  loading={sendMessageMutation.isPending}
                   style={{ marginLeft: "8px" }}
                 />
               </Space.Compact>
             </div>
-          </div>
+          </>
         )}
       </Layout.Content>
 
@@ -361,44 +422,59 @@ const MessageApp = ({ currentUserId }: MessageProps) => {
         title={modalType === "DIRECT" ? "Select Contact" : "Create Channel"}
         open={contactsModalVisible}
         onCancel={() => setContactsModalVisible(false)}
+        className={isDarkMode ? "dark-modal" : ""}
+        style={{ top: "30%" }}
         footer={[
-          <Button
-            key="back"
-            onClick={(e) => {
-              e.preventDefault();
-              setContactsModalVisible(false);
-            }}
-          >
+          <Button key="cancel" onClick={() => setContactsModalVisible(false)}>
             Cancel
           </Button>,
           <Button
             key="submit"
             type="primary"
-            onClick={(e) => {
-              e.preventDefault();
-              handleCreateDirectChat();
-            }}
+            onClick={handleCreateDirectChat}
+            disabled={!selectedUser}
           >
-            {modalType === "DIRECT" ? "Start Conversation" : "Create Channel"}
+            Start Conversation
           </Button>,
         ]}
       >
         {isLoadingContacts ? (
-          <div style={{ color: "#fff" }}>Loading contacts...</div>
+          <div style={{ color: isDarkMode ? "#fff" : "#000" }}>
+            Loading contacts...
+          </div>
         ) : (
           <Select
-            value={selectedUser} // Use the ID instead of the entire user object
+            value={selectedUser}
             onChange={(value) => {
               const selected = contactsQuery?.find(
                 (contact: User) => contact.id === value
               );
-
               if (selected) setSelectedUser(selected.id);
             }}
             style={{ width: "100%" }}
+            className={isDarkMode ? "dark-select" : ""}
+            placeholder="Select a user to chat with"
+            popupClassName={isDarkMode ? "dark-select-dropdown" : ""}
+            optionFilterProp="children"
+            notFoundContent="No contacts available"
+            virtual={false}
+            showSearch={false}
+            onDropdownVisibleChange={(open) => {
+              // Force rerender of dropdown when opened
+              if (open) {
+                setTimeout(() => {
+                  const event = new Event("resize");
+                  window.dispatchEvent(event);
+                }, 100);
+              }
+            }}
           >
             {contactsQuery?.map((contact: User) => (
-              <Select.Option key={contact.id} value={contact.id}>
+              <Select.Option
+                key={contact.id}
+                value={contact.id}
+                disabled={contact.id === userInfo.userId}
+              >
                 {contact.userName}
               </Select.Option>
             ))}

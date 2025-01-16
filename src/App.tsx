@@ -89,7 +89,7 @@ function App() {
                 path="messages"
                 element={
                   <Messages
-                    // isDarkMode={isDarkMode}
+                    isDarkMode={isDarkMode}
                     // token={accessToken}
                     currentUserId={userInfo?.userId ?? ""}
                   />
