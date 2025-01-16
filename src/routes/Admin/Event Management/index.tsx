@@ -31,7 +31,6 @@ function EventManagement({ isDarkMode }: EventManagementProp) {
     queryKey: ["admin-events", page, pageSize],
     queryFn: () => adminApi.getEventManagementData(page, pageSize),
   });
-  console.log("🚀  data:", data);
 
   const deleteEventMutation = useMutation({
     mutationFn: (eventId: string) => adminApi.deleteEvent(eventId),
