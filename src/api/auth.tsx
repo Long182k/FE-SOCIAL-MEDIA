@@ -84,12 +84,17 @@ export const getFollowing = async (
   return response.data;
 };
 
-export const getSuggestedUsers = async (
-  page: number,
-  limit: number
-) => {
+export const getSuggestedUsers = async (page: number, limit: number) => {
   const response = await axiosClient.get(
     `/users/suggestions?page=${page}&limit=${limit}`
   );
+  return response.data;
+};
+
+export const changePassword = async (data: {
+  oldPassword: string;
+  newPassword: string;
+}) => {
+  const response = await axiosClient.post("/auth/change-password", data);
   return response.data;
 };
