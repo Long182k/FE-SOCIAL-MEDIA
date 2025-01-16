@@ -61,15 +61,6 @@ const ProfileScreen = ({ isDarkMode }: ProfileScreenProps) => {
   });
   console.log("🚀  userDetail:", userDetail);
 
-  const { data: followStatus } = useQuery({
-    queryKey: ["followStatus", userId],
-    queryFn: () => getFollowStatus(userId),
-    enabled: !!userId && userId !== editedUserId,
-    onSuccess: (data) => {
-      setIsFollowing(data.isFollowing);
-    },
-  });
-
   const followUserMutation = useMutation({
     mutationFn: followUser,
     onSuccess: (data) => {

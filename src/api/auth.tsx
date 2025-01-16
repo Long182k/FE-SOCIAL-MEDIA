@@ -61,3 +61,35 @@ export const getUserById = async (id: string) => {
   const response = await axiosClient.get(`/auth/profile/${id}`);
   return response.data;
 };
+
+export const getFollowers = async (
+  userId: string,
+  page: number,
+  limit: number
+) => {
+  const response = await axiosClient.get(
+    `/users/followers/${userId}?page=${page}&limit=${limit}`
+  );
+  return response.data;
+};
+
+export const getFollowing = async (
+  userId: string,
+  page: number,
+  limit: number
+) => {
+  const response = await axiosClient.get(
+    `/users/following/${userId}?page=${page}&limit=${limit}`
+  );
+  return response.data;
+};
+
+export const getSuggestedUsers = async (
+  page: number,
+  limit: number
+) => {
+  const response = await axiosClient.get(
+    `/users/suggestions?page=${page}&limit=${limit}`
+  );
+  return response.data;
+};
