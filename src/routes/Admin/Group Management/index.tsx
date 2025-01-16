@@ -147,7 +147,7 @@ function GroupManagement({ isDarkMode }: GroupManagementProp) {
               setJoinRequestsVisible(true);
             }}
           >
-            Join Requests
+            View Join Requests
           </Button>
           <Button
             danger

@@ -20,16 +20,50 @@ interface EventManagementProp {
   isDarkMode: boolean;
 }
 
+interface EventRecord {
+  id: string;
+  name: string;
+  description: string;
+  eventAvatar: string | null;
+  eventDate: string;
+  category: string;
+  address: string | null;
+  createdAt: string;
+  creator: {
+    userName: string;
+  };
+  _count: {
+    attendees: number;
+  };
+}
+
 function EventManagement({ isDarkMode }: EventManagementProp) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const queryClient = useQueryClient();
   const [selectedEvent, setSelectedEvent] = useState<EventDetail | null>(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [joinRequestsVisible, setJoinRequestsVisible] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-events", page, pageSize],
     queryFn: () => adminApi.getEventManagementData(page, pageSize),
+  });
+
+  const { data: eventDetailQuery } = useQuery({
+    queryKey: ["event-detail", selectedEvent?.id],
+    select: (data) => data?.data,
+    queryFn: () =>
+      selectedEvent?.id ? eventApi.getEventById(selectedEvent.id) : null,
+    enabled: !!selectedEvent?.id,
+  });
+
+  const { data: joinRequestsQuery } = useQuery({
+    queryKey: ["event-join-requests", selectedEvent?.id],
+    select: (data) => data?.data,
+    queryFn: () =>
+      selectedEvent?.id ? eventApi.getJoinRequests(selectedEvent.id) : null,
+    enabled: !!selectedEvent?.id && joinRequestsVisible,
   });
 
   const deleteEventMutation = useMutation({
@@ -40,11 +74,26 @@ function EventManagement({ isDarkMode }: EventManagementProp) {
     },
   });
 
-  const eventDetailQuery = useQuery({
-    queryKey: ["event-detail", selectedEvent?.id],
-    queryFn: () =>
-      selectedEvent?.id ? eventApi.getEventById(selectedEvent.id) : null,
-    enabled: !!selectedEvent?.id,
+  const approveRequestMutation = useMutation({
+    mutationFn: ({ eventId, userId }: { eventId: string; userId: string }) =>
+      eventApi.approveRequest(eventId, userId),
+    onSuccess: () => {
+      setJoinRequestsVisible(false);
+      queryClient.invalidateQueries({ queryKey: ["event-detail"] });
+      queryClient.invalidateQueries({ queryKey: ["event-join-requests"] });
+      message.success("Request approved successfully");
+    },
+  });
+
+  const cancelAttendanceMutation = useMutation({
+    mutationFn: ({ eventId, userId }: { eventId: string; userId: string }) =>
+      eventApi.cancelAttendance(eventId, userId),
+    onSuccess: () => {
+      setJoinRequestsVisible(false);
+      queryClient.invalidateQueries({ queryKey: ["event-detail"] });
+      queryClient.invalidateQueries({ queryKey: ["event-join-requests"] });
+      message.success("Request rejected successfully");
+    },
   });
 
   const columns = [
@@ -69,10 +118,10 @@ function EventManagement({ isDarkMode }: EventManagementProp) {
     {
       title: "Event Details",
       key: "details",
-      render: (_, record: any) => (
+      render: (_: unknown, record: EventRecord) => (
         <Space direction="vertical" size="small">
           <span>Date: {new Date(record.eventDate).toLocaleDateString()}</span>
-          <span>Attendees: {record.attendeesCount}</span>
+          <span>Attendees: {record._count.attendees}</span>
           <span>
             Address: {record.address ? record.address : "No location specified"}
           </span>
@@ -88,15 +137,23 @@ function EventManagement({ isDarkMode }: EventManagementProp) {
     {
       title: "Actions",
       key: "actions",
-      render: (_, record: any) => (
+      render: (_: unknown, record: EventRecord) => (
         <Space>
           <Button
             onClick={() => {
-              setSelectedEvent(record);
+              setSelectedEvent(record as unknown as EventDetail);
               setDetailModalVisible(true);
             }}
           >
-            View Details
+            View All Attendees
+          </Button>
+          <Button
+            onClick={() => {
+              setSelectedEvent(record as unknown as EventDetail);
+              setJoinRequestsVisible(true);
+            }}
+          >
+            View Join Requests
           </Button>
           <Button
             danger
@@ -129,42 +186,42 @@ function EventManagement({ isDarkMode }: EventManagementProp) {
       <Tabs
         items={[
           {
-            key: "info",
-            label: "Basic Info",
-            children: (
-              <List>
-                <List.Item>
-                  <strong>Description:</strong>{" "}
-                  {eventDetailQuery.data?.description}
-                </List.Item>
-                <List.Item>
-                  <strong>Category:</strong> {eventDetailQuery.data?.category}
-                </List.Item>
-                <List.Item>
-                  <strong>Date:</strong>{" "}
-                  {new Date(
-                    eventDetailQuery.data?.eventDate || ""
-                  ).toLocaleDateString()}
-                </List.Item>
-                <List.Item>
-                  <strong>Address:</strong>{" "}
-                  {eventDetailQuery.data?.address || "N/A"}
-                </List.Item>
-                <List.Item>
-                  <strong>Total Attendees:</strong>{" "}
-                  {eventDetailQuery.data?.attendeesCount || 0}
-                </List.Item>
-              </List>
-            ),
-          },
-          {
             key: "attendees",
             label: "Attendees",
             children: (
               <List
-                dataSource={eventDetailQuery.data?.attendees || []}
+                dataSource={eventDetailQuery?.attendees || []}
                 renderItem={(attendee) => (
-                  <List.Item>
+                  <List.Item
+                    actions={[
+                      attendee.status === "PENDING" && (
+                        <Button
+                          type="primary"
+                          onClick={() =>
+                            approveRequestMutation.mutate({
+                              eventId: selectedEvent!.id,
+                              userId: attendee.id,
+                            })
+                          }
+                          loading={approveRequestMutation.isPending}
+                        >
+                          Approve
+                        </Button>
+                      ),
+                      <Button
+                        danger
+                        onClick={() =>
+                          cancelAttendanceMutation.mutate({
+                            eventId: selectedEvent!.id,
+                            userId: attendee.id,
+                          })
+                        }
+                        loading={cancelAttendanceMutation.isPending}
+                      >
+                        Remove
+                      </Button>,
+                    ].filter(Boolean)}
+                  >
                     <List.Item.Meta
                       avatar={<Avatar src={attendee.avatarUrl} />}
                       title={attendee.userName}
@@ -176,6 +233,61 @@ function EventManagement({ isDarkMode }: EventManagementProp) {
             ),
           },
         ]}
+      />
+    </Modal>
+  );
+
+  const renderJoinRequestsModal = () => (
+    <Modal
+      title={`Join Requests: ${selectedEvent?.name}`}
+      open={joinRequestsVisible}
+      onCancel={() => setJoinRequestsVisible(false)}
+      footer={null}
+      width={800}
+    >
+      <List
+        dataSource={joinRequestsQuery?.requests || []}
+        renderItem={(request) => (
+          <List.Item
+            actions={[
+              <Button
+                type="primary"
+                onClick={() =>
+                  approveRequestMutation.mutate({
+                    eventId: selectedEvent!.id,
+                    userId: request.userId,
+                  })
+                }
+                loading={approveRequestMutation.isPending}
+              >
+                Approve
+              </Button>,
+              <Button
+                danger
+                onClick={() =>
+                  cancelAttendanceMutation.mutate({
+                    eventId: selectedEvent!.id,
+                    userId: request.userId,
+                  })
+                }
+                loading={cancelAttendanceMutation.isPending}
+              >
+                Reject
+              </Button>,
+            ]}
+          >
+            <List.Item.Meta
+              avatar={<Avatar src={request.user.avatarUrl} />}
+              title={request.user.userName}
+              description={`Requested at: ${new Date(
+                request.createAt
+              ).toLocaleString()}`}
+            />
+          </List.Item>
+        )}
+        locale={{
+          emptyText: "No pending join requests",
+        }}
       />
     </Modal>
   );
@@ -203,6 +315,7 @@ function EventManagement({ isDarkMode }: EventManagementProp) {
         }}
       />
       {renderDetailModal()}
+      {renderJoinRequestsModal()}
     </div>
   );
 }
