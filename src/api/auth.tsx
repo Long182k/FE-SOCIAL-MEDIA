@@ -47,6 +47,16 @@ export const updateCoverPage = async (formData: FormData) => {
   return response.data;
 };
 
+export const followUser = async (userId: string) => {
+  const response = await axiosClient.post(`/users/follow/${userId}`);
+  return response.data;
+};
+
+export const getFollowStatus = async (userId: string) => {
+  const response = await axiosClient.get(`/users/follow-status/${userId}`);
+  return response.data;
+};
+
 export const getUserById = async (id: string) => {
   const response = await axiosClient.get(`/auth/profile/${id}`);
   return response.data;

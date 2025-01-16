@@ -16,6 +16,8 @@ import {
   updateAvatar,
   updateCoverPage,
   updateProfile,
+  followUser,
+  getFollowStatus,
 } from "../../../api/auth";
 import { toast } from "react-toastify";
 import { useSearchParams } from "react-router-dom";
@@ -46,13 +48,42 @@ const ProfileScreen = ({ isDarkMode }: ProfileScreenProps) => {
   const { userInfo, addUserInfo, removeUserInfo } = useAppStore();
   const queryClient = useQueryClient();
   const [isCopied, setIsCopied] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   const userId = searchParams.get("userId") || userInfo?.userId || userInfo?.id;
+
+  const editedUserId = userInfo?.userId || userInfo?.id;
 
   const { data: userDetail } = useQuery({
     queryKey: ["user", userId],
     queryFn: () => getUserById(userId),
     enabled: !!userId,
+  });
+  console.log("🚀  userDetail:", userDetail);
+
+  const { data: followStatus } = useQuery({
+    queryKey: ["followStatus", userId],
+    queryFn: () => getFollowStatus(userId),
+    enabled: !!userId && userId !== editedUserId,
+    onSuccess: (data) => {
+      setIsFollowing(data.isFollowing);
+    },
+  });
+
+  const followUserMutation = useMutation({
+    mutationFn: followUser,
+    onSuccess: (data) => {
+      setIsFollowing(data.isFollowing);
+      // Force refresh user data to update counts
+      queryClient.invalidateQueries({ queryKey: ["user", userId] });
+      toast.success(
+        data.isFollowing ? "Followed successfully" : "Unfollowed successfully"
+      );
+    },
+    onError: (error) => {
+      toast.error("Failed to update follow status");
+      console.error(error);
+    },
   });
 
   const updateProfileMutation = useMutation({
@@ -160,6 +191,11 @@ const ProfileScreen = ({ isDarkMode }: ProfileScreenProps) => {
     return momentDate.format(`[${formattedDay}] MMM YYYY`);
   };
 
+  const handleFollow = async () => {
+    if (!userId) return;
+    await followUserMutation.mutateAsync(userId);
+  };
+
   return (
     <div className={`profile-container ${isDarkMode ? "dark" : "light"}`}>
       {/* Cover Photo Section */}
@@ -250,7 +286,7 @@ const ProfileScreen = ({ isDarkMode }: ProfileScreenProps) => {
           <div className="profile-header">
             <h2>{userDetail?.userName}</h2>
             <div className="profile-actions">
-              {userInfo?.id === userDetail?.id ? (
+              {editedUserId === userDetail?.id ? (
                 <Button
                   icon={<EditOutlined />}
                   onClick={() => setIsEditing(true)}
@@ -266,15 +302,16 @@ const ProfileScreen = ({ isDarkMode }: ProfileScreenProps) => {
               ) : (
                 <Button
                   icon={<HeartOutlined />}
-                  // onClick={() => setIsEditing(true)}
+                  onClick={handleFollow}
+                  loading={followUserMutation.isPending}
                   style={{
-                    backgroundColor: "#f0f2f5",
+                    backgroundColor: isFollowing ? "#1890ff" : "#f0f2f5",
                     border: "none",
-                    color: "#65676b",
+                    color: isFollowing ? "#ffffff" : "#65676b",
                     marginRight: "8px",
                   }}
                 >
-                  Follow
+                  {isFollowing ? "Following" : "Follow"}
                 </Button>
               )}
               <Button
