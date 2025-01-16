@@ -1,12 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import axios from "axios";
 import { useState } from "react";
-import {
-  BrowserRouter,
-  Navigate,
-  Route,
-  Routes
-} from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import CenterContent from "./containers/CenterLayout/CenterContent";
 import Bookmarks from "./routes/User/Bookmarks";
@@ -37,14 +32,6 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const { userInfo } = useAppStore();
-  
-  // const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   if (userInfo?.role === "ADMIN") {
-  //     navigate("/dashboard");
-  //   }
-  // }, [userInfo]);
 
   const accessToken =
     localStorage?.getItem("access_token") || userInfo?.accessToken;
@@ -141,19 +128,35 @@ function App() {
               {/* Admin routes */}
               <Route
                 path="/dashboard"
-                element={<ProtectedAdminRoute component={<Dashboard isDarkMode={isDarkMode}/>} />}
+                element={
+                  <ProtectedAdminRoute
+                    component={<Dashboard isDarkMode={isDarkMode} />}
+                  />
+                }
               />
               <Route
                 path="/user-management"
-                element={<ProtectedAdminRoute component={<UserManagement isDarkMode={isDarkMode}/>} />}
+                element={
+                  <ProtectedAdminRoute
+                    component={<UserManagement isDarkMode={isDarkMode} />}
+                  />
+                }
               />
               <Route
                 path="/event-management"
-                element={<ProtectedAdminRoute component={<EventManagement isDarkMode={isDarkMode}/>} />}
+                element={
+                  <ProtectedAdminRoute
+                    component={<EventManagement isDarkMode={isDarkMode} />}
+                  />
+                }
               />
               <Route
                 path="/group-management"
-                element={<ProtectedAdminRoute component={<GroupManagement isDarkMode={isDarkMode}/>} />}
+                element={
+                  <ProtectedAdminRoute
+                    component={<GroupManagement isDarkMode={isDarkMode} />}
+                  />
+                }
               />
             </Route>
 

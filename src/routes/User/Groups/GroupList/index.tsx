@@ -73,6 +73,7 @@ function GroupList({ isDarkMode }: GroupListProps) {
     mutationFn: groupApi.requestJoinGroup,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
+      // queryClient.invalidateQueries({ queryKey: ["joinRequests", groupId] });
     },
   });
 
@@ -132,6 +133,34 @@ function GroupList({ isDarkMode }: GroupListProps) {
             >
               {group.name}
             </Title>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <img
+                src={
+                  group.creator.avatarUrl ||
+                  "https://res.cloudinary.com/dcivdqyyj/image/upload/v1736957755/sq1svii2veo8hewyelud.jpg"
+                }
+                alt={group.creator.userName}
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: "50%",
+                  marginRight: 8,
+                }}
+              />
+              <Text
+                style={{
+                  color: isDarkMode ? "#ffffff99" : "#00000099",
+                }}
+              >
+                Created by {group.creator.userName}
+              </Text>
+            </div>
             <Text
               style={{
                 color: isDarkMode ? "#ffffff99" : "#00000099",

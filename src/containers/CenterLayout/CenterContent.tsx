@@ -87,7 +87,7 @@ const CenterContent = ({
 
   return (
     <Content>
-      <StoryList isDarkMode={isDarkMode} />
+      {/* <StoryList isDarkMode={isDarkMode} /> */}
       <Card
         style={{
           marginBottom: 16,

@@ -40,25 +40,12 @@ const HomePage = ({ isDarkMode }: HomePageProps) => {
             position: "sticky",
             top: 0,
             zIndex: 1,
+            justifyContent: "flex-end", // Add this to push content to right
           }}
         >
-          <Input
-            placeholder="Search something here..."
-            prefix={<SearchOutlined style={getTextColor(isDarkMode)} />}
-            style={{
-              width: 300,
-              marginLeft: "8px",
-              color: isDarkMode ? "#fff" : "#000",
-              borderRadius: "10px",
-              background: isDarkMode ? "rgb(100 100 100)" : "#ffffff",
-              borderColor: isDarkMode ? "#333" : "#ddd",
-              alignSelf: "center",
-              marginTop: "8px",
-            }}
-          />
           <div
             className="header-right"
-            style={{ display: "flex", alignItems: "center" }}
+            style={{ display: "flex", alignItems: "center", gap: "12px" }}
           >
             <Avatar
               src={userInfo.avatarUrl}

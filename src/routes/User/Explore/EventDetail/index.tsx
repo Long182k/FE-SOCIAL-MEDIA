@@ -61,17 +61,22 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
   });
 
   const cancelAttendanceMutation = useMutation({
-    mutationFn: (cancelledUserId: string | undefined) =>
+    mutationFn: (cancelledUserId?: string | undefined) =>
       eventApi.cancelAttendance(eventId!, cancelledUserId),
-    onSuccess: (cancelledUserId) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event", eventId] });
+      queryClient.invalidateQueries({ queryKey: ["events", eventId] });
+
+      queryClient.invalidateQueries({ queryKey: ["events", "my-events"] });
+      queryClient.invalidateQueries({ queryKey: ["events", "discover"] });
       setRequestsModalVisible(false);
 
-      if (cancelledUserId) {
-        message.success("Cancel join request successfully");
-      } else {
-        message.success("Left the event successfully");
-      }
+      // console.log("cancelledUserId", cancelledUserId);
+      // if (cancelledUserId !== undefined) {
+      //   message.success("Cancel join request successfully");
+      // } else {
+      //   message.success("Left the event successfully");
+      // }
     },
   });
 
@@ -152,6 +157,7 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
       attendee.role === "ATTENDEE" &&
       attendee.status === "ENROLL"
   );
+  console.log("🚀  isMember:", isMember);
 
   return (
     <Layout
@@ -274,7 +280,11 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
                 <Button
                   type="primary"
                   danger
-                  onClick={() => cancelAttendanceMutation.mutate(undefined)}
+                  onClick={() => {
+                    cancelAttendanceMutation.mutate(undefined);
+                    message.success("Left the event successfully");
+                    navigate(`/explore`);
+                  }}
                   loading={cancelAttendanceMutation.isPending}
                 >
                   Leave
@@ -349,9 +359,10 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
                 </Button>,
                 <Button
                   danger
-                  onClick={() =>
-                    cancelAttendanceMutation.mutate(request.user.id)
-                  }
+                  onClick={() => {
+                    cancelAttendanceMutation.mutate(request.user.id);
+                    message.success("Reject join request successfully");
+                  }}
                   loading={cancelAttendanceMutation.isPending}
                 >
                   Reject

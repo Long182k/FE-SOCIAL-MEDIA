@@ -25,19 +25,6 @@
   margin: 0 24px 0 24px;
 }
 
-.responsive-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 16px;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
 .stories-card,
 .create-post-card,
 .post-list-card {

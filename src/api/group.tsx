@@ -97,20 +97,16 @@ export const groupApi = {
 
   approveJoinRequest: async (
     groupId: string,
-    requestId: string
+    userId: string
   ): Promise<void> => {
-    await axiosClient.post(
-      `/groups/${groupId}/join-requests/${requestId}/approve`
-    );
+    await axiosClient.post(`/groups/${groupId}/approve/${userId}`);
   },
 
   rejectJoinRequest: async (
     groupId: string,
-    requestId: string
+    userId: string | undefined
   ): Promise<void> => {
-    await axiosClient.post(
-      `/groups/${groupId}/join-requests/${requestId}/reject`
-    );
+    await axiosClient.post(`/groups/${groupId}/reject/${userId}`);
   },
 
   // Group Posts

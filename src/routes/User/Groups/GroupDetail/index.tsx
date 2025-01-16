@@ -26,6 +26,7 @@ import {
 import { groupApi, GroupPost } from "../../../../api/group";
 import "./index.css";
 import { useState } from "react";
+import { useAppStore } from "../../../../store";
 
 const { Title, Text } = Typography;
 
@@ -37,6 +38,8 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { userInfo } = useAppStore();
+
   const [isCopied, setIsCopied] = useState(false);
   const [isJoinRequestsModalOpen, setIsJoinRequestsModalOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -63,31 +66,38 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
   });
 
   const approveMutation = useMutation({
-    mutationFn: ({ requestId }: { requestId: string }) =>
-      groupApi.approveJoinRequest(groupId!, requestId),
+    mutationFn: ({ userId }: { userId: string }) =>
+      groupApi.approveJoinRequest(groupId!, userId),
     onSuccess: () => {
+      setIsJoinRequestsModalOpen(false);
       queryClient.invalidateQueries({ queryKey: ["joinRequests", groupId] });
       queryClient.invalidateQueries({ queryKey: ["group", groupId] });
+
+      queryClient.invalidateQueries({ queryKey: ["groups", "joined"] });
+      queryClient.invalidateQueries({ queryKey: ["groups", "exploring"] });
       message.success("Request approved successfully");
     },
   });
 
   const rejectMutation = useMutation({
-    mutationFn: ({ requestId }: { requestId: string }) =>
-      groupApi.rejectJoinRequest(groupId!, requestId),
+    mutationFn: ({ userId }: { userId?: string }) =>
+      groupApi.rejectJoinRequest(groupId!, userId),
     onSuccess: () => {
+      navigate("/groups");
+      setIsJoinRequestsModalOpen(false);
       queryClient.invalidateQueries({ queryKey: ["joinRequests", groupId] });
-      message.success("Request rejected successfully");
     },
   });
 
-  const handleApprove = (requestId: string) => {
-    approveMutation.mutate({ requestId });
+  const handleApprove = (userId: string) => {
+    approveMutation.mutate({ userId });
   };
 
-  const handleReject = (requestId: string) => {
-    rejectMutation.mutate({ requestId });
+  const handleReject = (userId?: string) => {
+    rejectMutation.mutate({ userId });
   };
+
+  const isAdmin = userInfo?.userId === group?.creatorId;
 
   const handleShare = async () => {
     try {
@@ -191,7 +201,7 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
               <Button
                 key="approve"
                 type="primary"
-                onClick={() => handleApprove(request.id)}
+                onClick={() => handleApprove(request.userId)}
                 loading={approveMutation.isPending}
               >
                 Approve
@@ -199,7 +209,10 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
               <Button
                 key="reject"
                 danger
-                onClick={() => handleReject(request.id)}
+                onClick={() => {
+                  message.success("Reject request successfully");
+                  handleReject(request.userId);
+                }}
                 loading={rejectMutation.isPending}
               >
                 Reject
@@ -300,26 +313,34 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
             >
               {isCopied ? "Copied" : "Share"}
             </Button>
-            <Button
-              icon={<UserOutlined />}
-              onClick={() => setIsJoinRequestsModalOpen(true)}
-              style={{
-                background: isDarkMode ? "#141414" : "#ffffff",
-                borderColor: isDarkMode ? "#303030" : "#d9d9d9",
-                color: isDarkMode ? "#ffffff" : "#000000",
-              }}
-            >
-              View Join Requests
-            </Button>
-            <Button
-              type="primary"
-              style={{
-                background: "#000000",
-                borderColor: "#000000",
-              }}
-            >
-              Leave
-            </Button>
+            {isAdmin && (
+              <Button
+                icon={<UserOutlined />}
+                onClick={() => setIsJoinRequestsModalOpen(true)}
+                style={{
+                  background: isDarkMode ? "#141414" : "#ffffff",
+                  borderColor: isDarkMode ? "#303030" : "#d9d9d9",
+                  color: isDarkMode ? "#ffffff" : "#000000",
+                }}
+              >
+                View Join Requests
+              </Button>
+            )}
+            {!isAdmin && (
+              <Button
+                type="primary"
+                style={{
+                  background: "#000000",
+                  borderColor: "#000000",
+                }}
+                onClick={() => {
+                  message.success("Leave group successfully");
+                  handleReject();
+                }}
+              >
+                Leave
+              </Button>
+            )}
           </Space>
         </div>
 

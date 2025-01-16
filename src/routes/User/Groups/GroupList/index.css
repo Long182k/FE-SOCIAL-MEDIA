@@ -134,3 +134,17 @@
 .category-select.dark .ant-select-selection-placeholder {
   color: rgba(255, 255, 255, 0.85);
 }
+
+.creator-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.creator-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
