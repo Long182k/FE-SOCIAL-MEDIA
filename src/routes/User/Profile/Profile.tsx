@@ -8,7 +8,7 @@ import {
 import { Button, DatePicker, Form, Input, message, Modal, Upload } from "antd";
 import moment from "moment";
 import { useState } from "react";
-import { useAppStore } from "../../store";
+import { useAppStore } from "../../../store";
 import "./Profile.css";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -16,7 +16,7 @@ import {
   updateAvatar,
   updateCoverPage,
   updateProfile,
-} from "../../api/auth";
+} from "../../../api/auth";
 import { toast } from "react-toastify";
 import { useSearchParams } from "react-router-dom";
 

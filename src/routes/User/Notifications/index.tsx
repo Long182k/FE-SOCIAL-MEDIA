@@ -2,7 +2,10 @@ import { DeleteOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Avatar, Layout, List, message, Space, Typography } from "antd";
 import { formatDistanceToNow } from "date-fns";
-import { notificationApi, NotificationResponse } from "../../api/notification";
+import {
+  notificationApi,
+  NotificationResponse,
+} from "../../../api/notification";
 import "./index.css";
 
 interface NotificationProps {
@@ -50,9 +53,7 @@ function Notifications({ isDarkMode }: NotificationProps): JSX.Element {
   };
 
   return (
-    <Layout
-      className={`notifications-layout ${isDarkMode ? "dark" : "light"}`}
-    >
+    <Layout className={`notifications-layout ${isDarkMode ? "dark" : "light"}`}>
       <Typography.Title
         level={1}
         className={`notifications-title ${isDarkMode ? "dark" : "light"}`}
@@ -71,7 +72,9 @@ function Notifications({ isDarkMode }: NotificationProps): JSX.Element {
               <DeleteOutlined
                 key="delete"
                 onClick={() => handleDelete(item.id)}
-                className={`notification-delete-icon ${isDarkMode ? "dark" : "light"}`}
+                className={`notification-delete-icon ${
+                  isDarkMode ? "dark" : "light"
+                }`}
               />,
             ]}
             onClick={() => !item.isRead && handleMarkAsRead(item.id)}
@@ -90,7 +93,9 @@ function Notifications({ isDarkMode }: NotificationProps): JSX.Element {
               title={
                 <Space>
                   <Typography.Text
-                    className={`notification-content ${isDarkMode ? "dark" : "light"}`}
+                    className={`notification-content ${
+                      isDarkMode ? "dark" : "light"
+                    }`}
                   >
                     {item.content}
                   </Typography.Text>
@@ -98,7 +103,9 @@ function Notifications({ isDarkMode }: NotificationProps): JSX.Element {
               }
               description={
                 <Typography.Text
-                  className={`notification-time ${isDarkMode ? "dark" : "light"}`}
+                  className={`notification-time ${
+                    isDarkMode ? "dark" : "light"
+                  }`}
                 >
                   {formatDistanceToNow(new Date(item.createdAt), {
                     addSuffix: true,

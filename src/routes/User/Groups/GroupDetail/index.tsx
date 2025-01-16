@@ -23,7 +23,7 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
-import { groupApi, GroupPost } from "../../../api/group";
+import { groupApi, GroupPost } from "../../../../api/group";
 import "./index.css";
 import { useState } from "react";
 

@@ -21,9 +21,9 @@ import {
 import dayjs from "dayjs";
 import { useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
-import { eventApi } from "../../../api/event";
+import { eventApi } from "../../../../api/event";
 import "./index.css";
-import { useAppStore } from "../../../store";
+import { useAppStore } from "../../../../store";
 
 const { Title, Text } = Typography;
 

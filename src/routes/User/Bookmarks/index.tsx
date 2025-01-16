@@ -15,9 +15,9 @@ import {
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
 import { toast } from "react-toastify";
-import { formatTimeAgo } from "../../@util/helpers";
-import { bookmarkApi } from "../../api/bookmark";
-import { renderContent } from "../../components/generalRender/renderContent";
+import { formatTimeAgo } from "../../../@util/helpers";
+import { bookmarkApi } from "../../../api/bookmark";
+import { renderContent } from "../../../components/generalRender/renderContent";
 import "./index.css";
 
 interface BookmarksProps {
@@ -27,9 +27,8 @@ function Bookmarks({ isDarkMode }: BookmarksProps): JSX.Element {
   const queryClient = useQueryClient();
   const [messageApi, contextHolder] = message.useMessage();
 
-
   const { data: bookmarks } = useQuery({
-    queryKey: ["bookmarks" ],
+    queryKey: ["bookmarks"],
     select: (data) => data.data,
     queryFn: () => bookmarkApi.getBookmarks(),
   });

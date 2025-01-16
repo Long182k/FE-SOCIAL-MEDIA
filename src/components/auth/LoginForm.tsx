@@ -30,12 +30,14 @@ const LoginForm = ({ onSwitchMode }: LoginFormProp) => {
     mutationFn: login,
     onSuccess: (res) => {
       localStorage.setItem("access_token", res.accessToken);
+      toast.success("Login successfully");
 
-      toast.success(
-        "Login successfully"
-      );
-
-      navigate("/");
+      // Navigate based on role
+      if (res.role === "ADMIN") {
+        navigate("/dashboard");
+      } else {
+        navigate("/");
+      }
     },
     onError: (error: AxiosError<ErrorResponseData>) => {
       if (error.response?.status === 401) {

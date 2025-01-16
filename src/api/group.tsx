@@ -54,7 +54,7 @@ export interface JoinRequest {
   id: string;
   userId: string;
   groupId: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: string;
   user: {
     id: string;
@@ -95,12 +95,22 @@ export const groupApi = {
     return response.data;
   },
 
-  approveJoinRequest: async (groupId: string, requestId: string): Promise<void> => {
-    await axiosClient.post(`/groups/${groupId}/join-requests/${requestId}/approve`);
+  approveJoinRequest: async (
+    groupId: string,
+    requestId: string
+  ): Promise<void> => {
+    await axiosClient.post(
+      `/groups/${groupId}/join-requests/${requestId}/approve`
+    );
   },
 
-  rejectJoinRequest: async (groupId: string, requestId: string): Promise<void> => {
-    await axiosClient.post(`/groups/${groupId}/join-requests/${requestId}/reject`);
+  rejectJoinRequest: async (
+    groupId: string,
+    requestId: string
+  ): Promise<void> => {
+    await axiosClient.post(
+      `/groups/${groupId}/join-requests/${requestId}/reject`
+    );
   },
 
   // Group Posts

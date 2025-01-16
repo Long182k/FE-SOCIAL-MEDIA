@@ -19,6 +19,7 @@ export type LoginResponse = {
   refreshToken: string;
   userId: string;
   userName: string;
+  role: string;
 };
 
 export type RegisterResponse = {

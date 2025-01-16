@@ -1,7 +1,7 @@
 import { LogoutOutlined, SunOutlined } from "@ant-design/icons";
 import { Button, Card, Layout, Space, Switch, theme, Typography } from "antd";
 import { useNavigate } from "react-router-dom";
-import { useAppStore } from "../../store";
+import { useAppStore } from "../../../store";
 
 const { Content } = Layout;
 const { Title, Text } = Typography;

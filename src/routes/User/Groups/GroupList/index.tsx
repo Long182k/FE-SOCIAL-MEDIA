@@ -15,7 +15,7 @@ import {
 import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Group, groupApi } from "../../../api/group";
+import { Group, groupApi } from "../../../../api/group";
 import "./index.css";
 
 const { Title, Text } = Typography;

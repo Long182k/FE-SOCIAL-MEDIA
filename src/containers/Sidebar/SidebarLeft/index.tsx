@@ -3,6 +3,8 @@ import Contacts from "./Contacts";
 import Logo from "./Logo";
 import MenuItems from "./Menu";
 import "./index.css";
+import AdminMenuItems from "./Menu/AdminMenus";
+import { useAppStore } from "../../../store";
 
 const { Sider } = Layout;
 
@@ -11,6 +13,10 @@ interface SidebarLeftProps {
 }
 
 function SidebarLeft({ isDarkMode }: SidebarLeftProps): JSX.Element {
+  const { userInfo } = useAppStore();
+  const isAdmin = userInfo?.role === "ADMIN";
+  console.log("🚀  isAdmin:", isAdmin);
+
   return (
     <Sider
       width={250}
@@ -18,10 +24,14 @@ function SidebarLeft({ isDarkMode }: SidebarLeftProps): JSX.Element {
     >
       <Logo isDarkMode={isDarkMode} />
 
-      <MenuItems isDarkMode={isDarkMode} />
-      <Divider />
+      {isAdmin ? (
+        <AdminMenuItems isDarkMode={isDarkMode} />
+      ) : (
+        <MenuItems isDarkMode={isDarkMode} />
+      )}
 
-      <Contacts isDarkMode={isDarkMode} />
+      <Divider />
+      {!isAdmin && <Contacts isDarkMode={isDarkMode} />}
     </Sider>
   );
 }

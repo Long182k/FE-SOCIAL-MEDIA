@@ -1,22 +1,29 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import axios from "axios";
 import { useState } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes
+} from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import CenterContent from "./containers/CenterLayout/CenterContent";
-import Bookmarks from "./routes/Bookmarks";
-import Explore from "./routes/Explore";
-import Groups from "./routes/Groups";
-import HomePage from "./routes/Home";
-import LoginPage from "./routes/Login";
-import Messages from "./routes/Messages";
-import Notifications from "./routes/Notifications";
-import Settings from "./routes/Settings";
+import Bookmarks from "./routes/User/Bookmarks";
+import Explore from "./routes/User/Explore";
+import Groups from "./routes/User/Groups";
+import HomePage from "./routes/User/Home";
+import LoginPage from "./routes/User/Login";
+import Messages from "./routes/User/Messages";
+import Notifications from "./routes/User/Notifications";
+import Settings from "./routes/User/Settings";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
+import Dashboard from "./routes/Admin/Dashboard";
+import UserManagement from "./routes/Admin/User Management";
+import Profile from "./routes/User/Profile";
 import { useAppStore } from "./store";
-import Profile from "./routes/Profile";
 
 const queryClient = new QueryClient();
 
@@ -28,12 +35,28 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const { userInfo } = useAppStore();
+  
+  // const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   if (userInfo?.role === "ADMIN") {
+  //     navigate("/dashboard");
+  //   }
+  // }, [userInfo]);
 
   const accessToken =
     localStorage?.getItem("access_token") || userInfo?.accessToken;
 
   const ProtectedRouter = ({ component }: ProtectedRouterProps) => {
     if (accessToken) {
+      return component;
+    } else {
+      return <Navigate replace to="/login" />;
+    }
+  };
+
+  const ProtectedAdminRoute = ({ component }: ProtectedRouterProps) => {
+    if (accessToken && userInfo?.role === "ADMIN") {
       return component;
     } else {
       return <Navigate replace to="/login" />;
@@ -111,6 +134,16 @@ function App() {
                     handleThemeChange={handleThemeChange}
                   />
                 }
+              />
+
+              {/* Admin routes */}
+              <Route
+                path="/dashboard"
+                element={<ProtectedAdminRoute component={<Dashboard isDarkMode={isDarkMode}/>} />}
+              />
+              <Route
+                path="/user-management"
+                element={<ProtectedAdminRoute component={<UserManagement isDarkMode={isDarkMode}/>} />}
               />
             </Route>
 

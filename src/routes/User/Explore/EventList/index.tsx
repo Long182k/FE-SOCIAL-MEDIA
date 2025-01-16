@@ -33,8 +33,8 @@ import {
   Event,
   eventApi,
   EventCategory,
-} from "../../../api/event";
-import { useAppStore } from "../../../store";
+} from "../../../../api/event";
+import { useAppStore } from "../../../../store";
 import "./index.css";
 
 interface ExploreProps {

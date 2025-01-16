@@ -2,14 +2,13 @@ import { SearchOutlined } from "@ant-design/icons";
 import { Avatar, Input, Layout, Typography } from "antd";
 import "antd/dist/reset.css";
 import { Outlet } from "react-router-dom";
-
+import { getTextColor } from "../../../@util/helpers";
+import SidebarLeft from "../../../containers/Sidebar/SidebarLeft";
+import SiderRight from "../../../containers/Sidebar/SidebarRight";
+import { useAppStore } from "../../../store";
 import { useNavigate } from "react-router-dom";
 
 import "./index.css";
-import { getTextColor } from "../../@util/helpers";
-import { useAppStore } from "../../store";
-import SidebarLeft from "../../containers/Sidebar/SidebarLeft";
-import SiderRight from "../../containers/Sidebar/SidebarRight";
 
 const { Header } = Layout;
 const { Text } = Typography;
