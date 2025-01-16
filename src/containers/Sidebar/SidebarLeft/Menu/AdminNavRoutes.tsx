@@ -1,18 +1,13 @@
 import {
+  CalendarOutlined,
   DashboardOutlined,
   SettingOutlined,
+  UsergroupAddOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import { useAppStore } from "../../../../store";
 
 export const useAdminNavRoutes = () => {
-  const { userInfo } = useAppStore();
-
-  // Get role from userInfo to check if user is admin
-  const isAdmin = userInfo?.role === "ADMIN";
-
-  const userId = userInfo?.userId || userInfo?.id;
 
   return [
     {
@@ -24,6 +19,16 @@ export const useAdminNavRoutes = () => {
       key: "user-management",
       icon: <UserOutlined />,
       label: <Link to="/user-management">User Management</Link>,
+    },
+    {
+      key: "group-management",
+      icon: <UsergroupAddOutlined />,
+      label: <Link to="/group-management">Group Management</Link>,
+    },
+    {
+      key: "event-management",
+      icon: <CalendarOutlined />,
+      label: <Link to="/event-management">Event Management</Link>,
     },
     {
       key: "settings",

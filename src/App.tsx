@@ -24,6 +24,8 @@ import Dashboard from "./routes/Admin/Dashboard";
 import UserManagement from "./routes/Admin/User Management";
 import Profile from "./routes/User/Profile";
 import { useAppStore } from "./store";
+import GroupManagement from "./routes/Admin/Group Management";
+import EventManagement from "./routes/Admin/Event Management";
 
 const queryClient = new QueryClient();
 
@@ -144,6 +146,14 @@ function App() {
               <Route
                 path="/user-management"
                 element={<ProtectedAdminRoute component={<UserManagement isDarkMode={isDarkMode}/>} />}
+              />
+              <Route
+                path="/event-management"
+                element={<ProtectedAdminRoute component={<EventManagement isDarkMode={isDarkMode}/>} />}
+              />
+              <Route
+                path="/group-management"
+                element={<ProtectedAdminRoute component={<GroupManagement isDarkMode={isDarkMode}/>} />}
               />
             </Route>
 

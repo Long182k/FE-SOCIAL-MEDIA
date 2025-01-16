@@ -67,6 +67,48 @@ export interface UserManagementData {
   pageSize: number;
 }
 
+export interface GroupManagementData {
+  groups: {
+    id: string;
+    name: string;
+    description: string | null;
+    groupAvatar: string | null;
+    createdAt: string;
+    creator: {
+      userName: string;
+    };
+    _count: {
+      members: number;
+      posts: number;
+    };
+  }[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface EventManagementData {
+  events: {
+    id: string;
+    name: string;
+    description: string;
+    eventAvatar: string | null;
+    eventDate: string;
+    category: string;
+    address: string | null;
+    createdAt: string;
+    creator: {
+      userName: string;
+    };
+    _count: {
+      attendees: number;
+    };
+  }[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 const adminApi = {
   getDashboardStats: async (): Promise<DashboardStats> => {
     const response = await axiosClient.get(`/admin/dashboard-stats`);
@@ -87,6 +129,36 @@ const adminApi = {
     const response = await axiosClient.patch(
       `/admin/users/${userId}/toggle-activity`
     );
+    return response.data;
+  },
+
+  getGroupManagementData: async (
+    page: number,
+    pageSize: number
+  ): Promise<GroupManagementData> => {
+    const response = await axiosClient.get(`/admin/groups`, {
+      params: { page, pageSize },
+    });
+    return response.data;
+  },
+
+  deleteGroup: async (groupId: string) => {
+    const response = await axiosClient.delete(`/admin/groups/${groupId}`);
+    return response.data;
+  },
+
+  getEventManagementData: async (
+    page: number,
+    pageSize: number
+  ): Promise<EventManagementData> => {
+    const response = await axiosClient.get(`/admin/events`, {
+      params: { page, pageSize },
+    });
+    return response.data;
+  },
+
+  deleteEvent: async (eventId: string) => {
+    const response = await axiosClient.delete(`/admin/events/${eventId}`);
     return response.data;
   },
 };

@@ -13,6 +13,8 @@ function AdminMenuItems({ isDarkMode }: MenuItemsProps): JSX.Element {
     const path = location.pathname;
     if (path.startsWith("/dashboard")) return "dashboard";
     if (path.startsWith("/user-management")) return "user-management";
+    if (path.startsWith("/group-management")) return "group-management";
+    if (path.startsWith("/event-management")) return "event-management";
     if (path.startsWith("/settings")) return "settings";
 
     return "dashboard";
