@@ -240,7 +240,7 @@ function EventList({ isDarkMode }: ExploreProps) {
                   <Tag>
                     <Space>
                       <UserOutlined />
-                      {event.attendeesCount}
+                      {event.activeAttendeesCount}
                     </Space>
                   </Tag>
                 </div>
