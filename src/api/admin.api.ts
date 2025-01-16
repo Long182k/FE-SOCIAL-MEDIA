@@ -40,13 +40,31 @@ export interface DashboardStats {
 export interface UserManagementData {
   users: {
     id: string;
-    username: string;
+    userName: string;
     email: string;
     role: string;
-    status: string;
+    isActive: boolean;
     createdAt: string;
+    lastLoginAt: string | null;
+    _count: {
+      posts: number;
+      followers: number;
+      following: number;
+    };
+    postSentimentRatio: {
+      GOOD: number;
+      MODERATE: number;
+      BAD: number;
+    };
+    commentSentimentRatio: {
+      GOOD: number;
+      MODERATE: number;
+      BAD: number;
+    };
   }[];
   total: number;
+  page: number;
+  pageSize: number;
 }
 
 const adminApi = {
@@ -65,15 +83,10 @@ const adminApi = {
     return response.data;
   },
 
-  updateUserStatus: async (userId: string, status: string) => {
-    const response = await axiosClient.patch(`/admin/users/${userId}/status`, {
-      status,
-    });
-    return response.data;
-  },
-
-  deleteUser: async (userId: string) => {
-    const response = await axiosClient.delete(`/admin/users/${userId}`);
+  toggleUserActivity: async (userId: string) => {
+    const response = await axiosClient.patch(
+      `/admin/users/${userId}/toggle-activity`
+    );
     return response.data;
   },
 };
