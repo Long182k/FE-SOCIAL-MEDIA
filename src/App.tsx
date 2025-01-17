@@ -103,7 +103,7 @@ function App() {
                   <Messages
                     isDarkMode={isDarkMode}
                     // token={accessToken}
-                    currentUserId={userInfo?.userId ?? ""}
+                    currentUserId={userInfo?.userId ?? userInfo?.id}
                   />
                 }
               />

@@ -15,7 +15,6 @@ interface SidebarLeftProps {
 function SidebarLeft({ isDarkMode }: SidebarLeftProps): JSX.Element {
   const { userInfo } = useAppStore();
   const isAdmin = userInfo?.role === "ADMIN";
-  console.log("🚀  isAdmin:", isAdmin);
 
   return (
     <Sider

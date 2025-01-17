@@ -222,9 +222,9 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
             <List.Item.Meta
               avatar={<Avatar src={request.user.avatarUrl} />}
               title={request.user.userName}
-              description={`Requested on ${new Date(
-                request.createdAt
-              ).toLocaleDateString()}`}
+              // description={`Requested on ${new Date(
+              //   request.createdAt
+              // ).toLocaleDateString()}`}
             />
           </List.Item>
         )}

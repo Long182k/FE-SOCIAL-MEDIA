@@ -1,4 +1,3 @@
-import { SearchOutlined } from "@ant-design/icons";
 import { Avatar, Input, Layout, Typography } from "antd";
 import "antd/dist/reset.css";
 import { Outlet } from "react-router-dom";
@@ -24,6 +23,8 @@ const HomePage = ({ isDarkMode }: HomePageProps) => {
   const handleNavigateToProfile = (userId: string) => {
     navigate(`/profile?userId=${userId}`);
   };
+
+  const isAdmin = userInfo?.role === "ADMIN";
 
   return (
     <Layout className="homepage-layout">
@@ -68,7 +69,7 @@ const HomePage = ({ isDarkMode }: HomePageProps) => {
         </div>
       </Layout>
 
-      <SiderRight isDarkMode={isDarkMode} />
+      {!isAdmin && <SiderRight isDarkMode={isDarkMode} />}
     </Layout>
   );
 };

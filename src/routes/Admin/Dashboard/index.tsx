@@ -202,10 +202,10 @@ const Dashboard = ({ isDarkMode }: DashboardProps) => {
               valueStyle={{ color: isDarkMode ? "#ffffff" : "inherit" }}
             />
             <div style={{ fontSize: "12px", color: "#52c41a" }}>
-              Positive: {stats?.commentSentimentRatio.positive.toFixed(1)}%
+              Positive: {stats?.commentSentimentRatio.positive.toFixed(1) ?? 0}%
             </div>
             <div style={{ fontSize: "12px", color: "#ff4d4f" }}>
-              Negative: {stats?.commentSentimentRatio.negative.toFixed(1)}%
+              Negative: {stats?.commentSentimentRatio.negative.toFixed(1) ?? 0}%
             </div>
             <div
               style={{
@@ -213,7 +213,7 @@ const Dashboard = ({ isDarkMode }: DashboardProps) => {
                 color: isDarkMode ? "#d89614" : "#faad14",
               }}
             >
-              Moderate: {stats?.commentSentimentRatio.moderate.toFixed(1)}%
+              Moderate: {stats?.commentSentimentRatio.moderate.toFixed(1) ?? 0}%
             </div>
           </Card>
         </Col>
