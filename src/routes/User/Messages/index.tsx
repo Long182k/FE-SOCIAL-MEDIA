@@ -14,15 +14,19 @@ import {
   Select,
   Space,
   Typography,
+  Upload,
+  Image,
 } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { User } from "../../../@util/types/auth.type";
 
+import type { UploadFile } from "antd/es/upload/interface";
 import { convertToHumanTime } from "../../../@util/helpers";
 import { ChatRoom } from "../../../@util/interface/chat.interface";
 import { useAppStore } from "../../../store";
 import "./chat.css"; // Custom CSS for chat bubble styles
+import Plyr from "plyr-react";
 
 const { Text } = Typography;
 
@@ -55,6 +59,7 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
   const [nameChatRoom, setNameChatRoom] = useState<string>("");
   const [selectedUser, setSelectedUser] = useState<string>("");
   const { userInfo } = useAppStore();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   const userId = userInfo.userId ?? userInfo.id;
 
@@ -128,17 +133,34 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
     },
   });
 
+  const handleFileChange = ({
+    fileList: newFileList,
+  }: {
+    fileList: UploadFile[];
+  }) => {
+    setFileList(newFileList);
+  };
+
   const handleSendMessage = () => {
     if (!content.trim() || !selectedChatRoom) return;
 
-    const newMsg = {
-      chatRoomId: selectedChatRoom.id,
-      senderId: currentUserId,
-      receiverId: selectedUser,
-      content,
-    };
-    sendMessageMutation.mutate(newMsg);
-    setContent(""); // Clear the input after sending the message
+    const formData = new FormData();
+    formData.append("content", content);
+    formData.append("chatRoomId", selectedChatRoom.id);
+    formData.append("senderId", currentUserId);
+    formData.append("receiverId", selectedUser);
+
+    if (fileList.length > 0) {
+      fileList
+        .map((file) => file.originFileObj)
+        .filter((file): file is File => file !== undefined)
+        .forEach((file) => {
+          formData.append("files", file);
+        });
+    }
+
+    sendMessageMutation.mutate(formData);
+    setFileList([]);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -338,11 +360,7 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
                             : message.senderId === currentUserId
                             ? "#f0f2f5"
                             : "#f0f2f5",
-                          color: isDarkMode
-                            ? "#ffffff"
-                            : message.senderId === currentUserId
-                            ? "#000000"
-                            : "#000000",
+                          color: isDarkMode ? "#ffffff" : "#000000",
                         }}
                       >
                         <Text
@@ -354,6 +372,54 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
                           {message.user?.userName}
                         </Text>
                         <p className="content">{message.content}</p>
+                        {message.attachments &&
+                          message.attachments.length > 0 && (
+                            <Space wrap style={{ marginTop: "8px" }}>
+                              {message.attachments.map((attachment) => (
+                                <div key={attachment.id}>
+                                  {attachment.type === "video" ? (
+                                    <div style={{ width: "200px" }}>
+                                      <Plyr
+                                        source={{
+                                          type: "video",
+                                          sources: [
+                                            {
+                                              src: attachment.url,
+                                              type: "video/mp4",
+                                            },
+                                          ],
+                                        }}
+                                        options={{
+                                          controls: [
+                                            "play",
+                                            "progress",
+                                            "current-time",
+                                            "mute",
+                                            "volume",
+                                          ],
+                                        }}
+                                      />
+                                    </div>
+                                  ) : (
+                                    <Image
+                                      src={attachment.url}
+                                      alt="Message attachment"
+                                      style={{
+                                        maxWidth: "200px",
+                                        maxHeight: "200px",
+                                        objectFit: "cover",
+                                        borderRadius: "8px",
+                                      }}
+                                      preview={{
+                                        mask: null,
+                                        maskClassName: "custom-mask",
+                                      }}
+                                    />
+                                  )}
+                                </div>
+                              ))}
+                            </Space>
+                          )}
                         <Text
                           className="timestamp"
                           style={{
@@ -383,17 +449,29 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
               }}
             >
               <Space.Compact style={{ display: "flex", alignItems: "center" }}>
-                <Button
-                  type="text"
-                  icon={
-                    <PaperClipOutlined
-                      style={{
-                        color: isDarkMode ? "#B5BAC1" : "#65676b",
-                      }}
-                    />
-                  }
-                  style={{ marginRight: "8px" }}
-                />
+                <Upload
+                  fileList={fileList}
+                  onChange={handleFileChange}
+                  multiple
+                  maxCount={5}
+                  showUploadList={{
+                    showPreviewIcon: true,
+                    showRemoveIcon: true,
+                  }}
+                  beforeUpload={() => false}
+                  accept="image/*,video/*"
+                >
+                  <Button
+                    type="text"
+                    icon={
+                      <PaperClipOutlined
+                        style={{
+                          color: isDarkMode ? "#B5BAC1" : "#65676b",
+                        }}
+                      />
+                    }
+                  />
+                </Upload>
                 <Input
                   placeholder="Enter message"
                   style={{
@@ -406,6 +484,7 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   onKeyDown={handleKeyDown}
+                  disabled={sendMessageMutation.isPending}
                 />
                 <Button
                   type="primary"

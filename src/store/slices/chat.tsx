@@ -52,7 +52,11 @@ export const createChatState: StateCreator<ChatStore> = (set, get) => ({
     const socket = useAppStore.getState().socket;
 
     try {
-      const res = await axiosClient.post("/chat/message/send", messageData);
+      const res = await axiosClient.post("/chat/message/send", messageData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       if (socket) {
         socket?.emit("sendMessage", res.data);

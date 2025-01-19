@@ -189,3 +189,33 @@
   background-color: #393c43 !important;
   color: #ffffff !important;
 }
+
+/* Add these styles to your existing chat.css */
+.bubble .ant-image {
+  transition: transform 0.2s ease;
+}
+
+.bubble .ant-image:hover {
+  transform: scale(1.02);
+}
+
+.bubble .custom-mask {
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+}
+
+.bubble .ant-space {
+  width: 100%;
+}
+
+/* Adjust bubble width for attachments */
+.message .bubble {
+  max-width: 60%;
+  word-wrap: break-word;
+}
+
+/* Ensure images don't overflow */
+.message .bubble img {
+  max-width: 100%;
+  height: auto;
+}
