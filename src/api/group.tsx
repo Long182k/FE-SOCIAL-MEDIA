@@ -111,7 +111,7 @@ export const groupApi = {
 
   // Group Posts
   getGroupPosts: async (groupId: string) => {
-    const response = await axiosClient.get(`/groups/${groupId}/posts`);
+    const response = await axiosClient.get(`/groups-posts/${groupId}`);
     return response.data;
   },
 
@@ -119,10 +119,28 @@ export const groupApi = {
     groupId: string,
     data: {
       content: string;
-      attachments?: { type: "image" | "video"; url: string }[];
+      files?: File[];
     }
   ) => {
-    const response = await axiosClient.post(`/groups/${groupId}/posts`, data);
+    const formData = new FormData();
+    formData.append("content", data.content);
+
+    // Append files if they exist
+    if (data.files && data.files.length > 0) {
+      data.files.forEach((file) => {
+        formData.append("files", file);
+      });
+    }
+
+    const response = await axiosClient.post(
+      `/groups-posts/${groupId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
     return response.data;
   },
 
@@ -135,7 +153,7 @@ export const groupApi = {
     }
   ) => {
     const response = await axiosClient.put(
-      `/groups/${groupId}/posts/${postId}`,
+      `/groups-posts/${groupId}/${postId}`,
       data
     );
     return response.data;
@@ -143,7 +161,7 @@ export const groupApi = {
 
   deleteGroupPost: async (groupId: string, postId: string) => {
     const response = await axiosClient.delete(
-      `/groups/${groupId}/posts/${postId}`
+      `/groups-posts/${groupId}/${postId}`
     );
     return response.data;
   },

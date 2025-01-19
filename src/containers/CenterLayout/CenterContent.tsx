@@ -12,7 +12,6 @@ import { postApi } from "../../api/post";
 import CreatePostForm from "../../components/posts/CreatePostForm";
 import PostItem from "../../components/posts/Detail/PostItem";
 import EditPostModal from "../../components/posts/EditPostModal";
-import StoryList from "../../components/posts/Stories";
 const { Content } = Layout;
 
 interface CenterContentProps {

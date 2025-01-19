@@ -3,6 +3,7 @@ import {
   ShareAltOutlined,
   CheckOutlined,
   UserOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -16,6 +17,8 @@ import {
   Space,
   Typography,
   message,
+  Input,
+  Upload,
 } from "antd";
 import {
   Navigate,
@@ -27,6 +30,7 @@ import { groupApi, GroupPost } from "../../../../api/group";
 import "./index.css";
 import { useState } from "react";
 import { useAppStore } from "../../../../store";
+import type { UploadFile } from "antd/es/upload/interface";
 
 const { Title, Text } = Typography;
 
@@ -113,6 +117,115 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
       message.error("Failed to copy link");
     }
   };
+
+  const [postContent, setPostContent] = useState("");
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const createPostMutation = useMutation({
+    mutationFn: async ({
+      content,
+      files,
+    }: {
+      content: string;
+      files: File[];
+    }) => {
+      return groupApi.createGroupPost(groupId!, {
+        content,
+        files,
+      });
+    },
+    onSuccess: () => {
+      setPostContent("");
+      setFileList([]);
+      queryClient.invalidateQueries({ queryKey: ["groupPosts", groupId] });
+      message.success("Post created successfully");
+    },
+    onError: () => {
+      message.error("Failed to create post");
+    },
+  });
+
+  const handleCreatePost = async () => {
+    if (!postContent.trim()) {
+      message.warning("Please enter some content");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const files = fileList
+        .filter((file) => file.originFileObj)
+        .map((file) => file.originFileObj!) as File[];
+
+      await createPostMutation.mutateAsync({
+        content: postContent,
+        files,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const createPostSection = (
+    <div
+      style={{
+        padding: "20px",
+        borderBottom: `1px solid ${isDarkMode ? "#303030" : "#f0f0f0"}`,
+      }}
+    >
+      <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+        <Avatar src={userInfo?.avatarUrl} size={40} />
+        <Input.TextArea
+          value={postContent}
+          onChange={(e) => setPostContent(e.target.value)}
+          placeholder={`What's on your mind, ${userInfo?.userName}?`}
+          autoSize={{ minRows: 2, maxRows: 6 }}
+          style={{
+            background: isDarkMode ? "#1f1f1f" : "#ffffff",
+            color: isDarkMode ? "#ffffff" : "#000000",
+            flex: 1,
+          }}
+        />
+      </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Upload
+          fileList={fileList}
+          onChange={({ fileList }) => setFileList(fileList)}
+          multiple
+          maxCount={5}
+          beforeUpload={() => false}
+        >
+          <Button
+            icon={<UploadOutlined />}
+            style={{
+              background: isDarkMode ? "#1f1f1f" : "#ffffff",
+              borderColor: isDarkMode ? "#303030" : "#d9d9d9",
+              color: isDarkMode ? "#ffffff" : "#000000",
+            }}
+          >
+            Attach Files
+          </Button>
+        </Upload>
+        <Button
+          type="primary"
+          onClick={handleCreatePost}
+          loading={isSubmitting}
+          style={{
+            background: "#1677ff",
+          }}
+        >
+          Post
+        </Button>
+      </div>
+    </div>
+  );
 
   if (!groupId) {
     return <Navigate to="/groups" replace />;
@@ -343,6 +456,12 @@ function GroupDetail({ isDarkMode }: GroupDetailProps) {
             )}
           </Space>
         </div>
+
+        {group?.members?.some(
+          (member) =>
+            member.userId === userInfo?.userId &&
+            (member.role === "MEMBER" || member.role === "ADMIN")
+        ) && createPostSection}
 
         <div className="posts-container">
           <List
