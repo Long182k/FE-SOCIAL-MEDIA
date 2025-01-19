@@ -39,6 +39,8 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
   const [requestsModalVisible, setRequestsModalVisible] = useState(false);
   const { userInfo } = useAppStore();
 
+  const userId = userInfo.userId ?? userInfo.id;
+
   const eventId = searchParams.get("eventId");
 
   const fromTab = searchParams.get("from") || "my-events";
@@ -141,8 +143,7 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
   }
 
   const isAdmin = event?.attendees?.some(
-    (attendee) =>
-      attendee.userId === userInfo?.userId && attendee.role === "ADMIN"
+    (attendee) => attendee.userId === userId && attendee.role === "ADMIN"
   );
 
   const activeMembers = event?.attendees?.filter(
@@ -153,11 +154,10 @@ function EventDetail({ isDarkMode }: EventDetailProps) {
 
   const isMember = event?.attendees?.some(
     (attendee) =>
-      attendee.userId === userInfo?.userId &&
+      attendee.userId === userId &&
       attendee.role === "ATTENDEE" &&
       attendee.status === "ENROLL"
   );
-  console.log("🚀  isMember:", isMember);
 
   return (
     <Layout

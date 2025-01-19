@@ -4,6 +4,7 @@ import {
   EditOutlined,
   LikeOutlined,
   SaveOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -15,6 +16,7 @@ import {
   Space,
   Tooltip,
   Typography,
+  Upload,
 } from "antd";
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
@@ -29,6 +31,7 @@ import { renderContent } from "../../generalRender/renderContent";
 import CommentItem from "./CommentItem";
 import "./PostItem.css";
 import { useNavigate } from "react-router-dom";
+import type { UploadFile } from "antd/es/upload/interface";
 
 interface PostItemProps {
   post: Post;
@@ -37,6 +40,7 @@ interface PostItemProps {
   isLoadingPosts: boolean;
   refetchPosts: () => void;
   onEdit: (post: Post) => void;
+  onDelete?: (postId: string) => Promise<void>;
 }
 
 const getSentimentMessage = (sentiment: string) => {
@@ -68,6 +72,7 @@ const PostItem = ({
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const { userInfo } = useAppStore();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   const isOwner = post.userId === currentUserId;
 
@@ -105,18 +110,40 @@ const PostItem = ({
 
   const createCommentMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: CreateCommentDto }) => {
-      return postApi.commentPost(id, data);
+      const formData = new FormData();
+      formData.append("content", data.content);
+      
+      if (data.files) {
+        data.files.forEach((file) => {
+          formData.append("files", file);
+        });
+      }
+      
+      return postApi.commentPost(id, formData);
     },
     onSuccess: () => {
       refetchPosts();
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      setCommentText("");
+      setFileList([]);
+      toast.success("Comment posted successfully!");
+    },
+    onError: () => {
+      toast.error("Failed to post comment");
     },
   });
 
   // Handlers
 
-  const handleCreateCmt = (id: string, data: CreateCommentDto): void => {
-    createCommentMutation.mutate({ id, data });
+  const handleCreateCmt = (
+    id: string,
+    content: string,
+    files?: File[]
+  ): void => {
+    createCommentMutation.mutate({
+      id,
+      data: { content, files },
+    });
   };
 
   const handleLikePost = (postId: string): void => {
@@ -135,6 +162,14 @@ const PostItem = ({
 
   const handleNavigateToProfile = (userId: string) => {
     navigate(`/profile?userId=${userId}`);
+  };
+
+  const handleFileChange = ({
+    fileList: newFileList,
+  }: {
+    fileList: UploadFile[];
+  }) => {
+    setFileList(newFileList);
   };
 
   return (
@@ -345,31 +380,64 @@ const PostItem = ({
             }}
           >
             {/* Quick Comment Input */}
-            <Space style={{ width: "100%", marginBottom: 16 }}>
-              <Avatar src={userInfo.avatarUrl} alt={userInfo.userName} />
-              <Input.TextArea
-                placeholder="Write a comment..."
-                autoSize={{ minRows: 1, maxRows: 2 }}
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                onPressEnter={(e) => {
-                  if (!e.shiftKey) {
-                    e.preventDefault();
-                    if (commentText.trim()) {
-                      handleCreateCmt(post.id, { content: commentText });
-                      setCommentText("");
-                    }
-                  }
-                }}
-                style={{
-                  backgroundColor: isDarkMode ? "#3a3b3c" : "#f0f2f5",
-                  borderRadius: "20px",
-                  padding: "8px 12px",
-                  border: "none",
-                  color: isDarkMode ? "#e4e6eb" : "inherit",
-                  width: "100%",
-                }}
-              />
+            <Space direction="vertical" style={{ width: "100%" }}>
+              <Space style={{ width: "100%", marginBottom: 8 }}>
+                <Avatar src={userInfo.avatarUrl} alt={userInfo.userName} />
+                <div style={{ position: "relative", width: "100%" }}>
+                  <Input.TextArea
+                    placeholder={createCommentMutation.isPending ? "Posting comment..." : "Write a comment..."}
+                    autoSize={{ minRows: 1, maxRows: 2 }}
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    onPressEnter={(e) => {
+                      if (!e.shiftKey) {
+                        e.preventDefault();
+                        if (commentText.trim()) {
+                          const files = fileList
+                            .map((file) => file.originFileObj)
+                            .filter((file): file is File => file !== undefined);
+                          handleCreateCmt(post.id, commentText, files);
+                          setFileList([]); // Reset file list after submission
+                        }
+                      }
+                    }}
+                    style={{
+                      backgroundColor: isDarkMode ? "#3a3b3c" : "#f0f2f5",
+                      borderRadius: "20px",
+                      padding: "8px 12px",
+                      paddingRight: "40px", // Make room for the upload icon
+                      border: "none",
+                      color: isDarkMode ? "#e4e6eb" : "inherit",
+                      width: "100%",
+                    }}
+                    disabled={createCommentMutation.isPending}
+                  />
+                  <Upload
+                    fileList={fileList}
+                    onChange={handleFileChange}
+                    multiple
+                    maxCount={5}
+                    showUploadList={{
+                      showPreviewIcon: true,
+                      showRemoveIcon: true,
+                    }}
+                    beforeUpload={() => false}
+                    accept="image/*,video/*"
+                  >
+                    <UploadOutlined
+                      style={{
+                        position: "absolute",
+                        right: "12px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        fontSize: "20px",
+                        color: isDarkMode ? "#b0b3b8" : undefined,
+                        cursor: "pointer",
+                      }}
+                    />
+                  </Upload>
+                </div>
+              </Space>
             </Space>
 
             {/* Comments List */}

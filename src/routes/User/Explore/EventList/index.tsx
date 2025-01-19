@@ -57,6 +57,9 @@ function EventList({ isDarkMode }: ExploreProps) {
   const queryClient = useQueryClient();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const { userInfo } = useAppStore();
+
+  const userId = userInfo.userId ?? userInfo.id
+
   const navigate = useNavigate();
   const [joiningEventId, setJoiningEventId] = useState<string | null>(null);
 
@@ -199,7 +202,7 @@ function EventList({ isDarkMode }: ExploreProps) {
 
       const isEventMember = event.attendees?.some(
         (attendee) =>
-          attendee.userId === userInfo?.userId &&
+          attendee.userId === userId &&
           (attendee.role === "ADMIN" || attendee.role === "ATTENDEE") &&
           attendee.status === "ENROLL"
       );

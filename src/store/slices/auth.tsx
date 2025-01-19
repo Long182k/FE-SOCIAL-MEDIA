@@ -110,7 +110,7 @@ const createAuthState: StateCreator<AuthStore> = (set, get) => ({
     const socket = io(SOCKET_URL, {
       transports: ["websocket"],
       query: {
-        userId: userInfo.userId,
+        userId: userInfo.userId ?? userInfo.id,
       },
     });
 

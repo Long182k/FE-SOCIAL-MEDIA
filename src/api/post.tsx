@@ -18,8 +18,7 @@ export const postApi = {
       },
     }),
 
-  getPosts: () =>
-    axiosClient.get<PostResponse>("/posts"),
+  getPosts: () => axiosClient.get<PostResponse>("/posts"),
 
   getPost: (id: string) => axiosClient.get<ApiResponse<Post>>(`/posts/${id}`),
 
@@ -31,7 +30,10 @@ export const postApi = {
   likePost: (id: string) =>
     axiosClient.post<PostInteractionResponse>(`/posts/${id}/like`),
 
-  commentPost: (id: string, data: CreateCommentDto) => {
-    return axiosClient.post<ApiResponse<Comment>>(`/posts/${id}/comment`, data);
-  },
+  commentPost: (postId: string, formData: FormData) =>
+    axiosClient.post(`/posts/${postId}/comment`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }),
 };

@@ -1,18 +1,31 @@
 import { Comment } from "@ant-design/compatible";
-import { Avatar, Typography, Tooltip } from "antd";
+import { Avatar, Image, Space, Tooltip, Typography } from "antd";
 import { formatDistance } from "date-fns";
-import { User } from "../../../@util/types/auth.type";
+import Plyr from "plyr-react";
+import "plyr-react/plyr.css";
 import { useNavigate } from "react-router-dom";
+import "./CommentItem.css";
 
-export interface CommentItemProps {
+interface CommentItemProps {
   comment: {
     id: string;
     content: string;
-    createdAt: Date;
+    createdAt: Date | string;
     userId: string;
-    postId: string;
     sentiment: string;
-    user: User;
+    user: {
+      id: string;
+      userName: string;
+      avatarUrl?: string;
+    };
+    attachments: {
+      id: string;
+      commentId: string | null;
+      postId: string | null;
+      type: "image" | "video";
+      url: string;
+      createdAt: string;
+    }[];
   };
   isDarkMode: boolean;
 }
@@ -53,14 +66,65 @@ const CommentItem = ({ comment, isDarkMode }: CommentItemProps) => {
         />
       }
       content={
-        <Typography.Paragraph
+        <div
           style={{
-            color: isDarkMode ? "#e4e6eb" : "inherit",
-            margin: 0,
+            backgroundColor: isDarkMode ? "#3a3b3c" : "#f0f2f5",
+            padding: "8px 12px",
+            borderRadius: "16px",
+            maxWidth: "fit-content",
           }}
         >
-          {comment.content}
-        </Typography.Paragraph>
+          <Typography.Paragraph
+            style={{
+              color: isDarkMode ? "#e4e6eb" : "inherit",
+              margin: 0,
+            }}
+          >
+            {comment.content}
+          </Typography.Paragraph>
+          {comment.attachments && comment.attachments.length > 0 && (
+            <Space wrap style={{ marginTop: "8px" }}>
+              {comment.attachments.map((attachment) => (
+                <div key={attachment.id}>
+                  {attachment.type === "video" ? (
+                    <div style={{ width: "200px" }}>
+                      <Plyr
+                        source={{
+                          type: "video",
+                          sources: [{ src: attachment.url, type: "video/mp4" }],
+                        }}
+                        options={{
+                          controls: [
+                            "play",
+                            "progress",
+                            "current-time",
+                            "mute",
+                            "volume",
+                          ],
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <Image
+                      src={attachment.url}
+                      alt="Comment attachment"
+                      style={{
+                        maxWidth: "200px",
+                        maxHeight: "200px",
+                        objectFit: "cover",
+                        borderRadius: "8px",
+                      }}
+                      preview={{
+                        mask: null,
+                        maskClassName: "custom-mask",
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
+            </Space>
+          )}
+        </div>
       }
       datetime={
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>

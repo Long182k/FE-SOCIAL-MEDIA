@@ -32,6 +32,7 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const { userInfo } = useAppStore();
+  console.log("🚀  userInfo:", userInfo);
 
   const accessToken =
     localStorage?.getItem("access_token") || userInfo?.accessToken;

@@ -56,6 +56,8 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
   const [selectedUser, setSelectedUser] = useState<string>("");
   const { userInfo } = useAppStore();
 
+  const userId = userInfo.userId ?? userInfo.id;
+
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
   const handleSelectChatRoom = (room: ChatRoom) => {
@@ -473,7 +475,7 @@ const MessageApp = ({ currentUserId, isDarkMode }: MessageProps) => {
               <Select.Option
                 key={contact.id}
                 value={contact.id}
-                disabled={contact.id === userInfo.userId}
+                disabled={contact.id === userId}
               >
                 {contact.userName}
               </Select.Option>
